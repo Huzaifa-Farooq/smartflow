@@ -44,10 +44,12 @@ styles = StyleSheet.create({
         width: '80%'
     },
     title: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: 'bold',
+        color: '#777777'
     },
     size: {
         fontSize: 11,
+        color: '#777777'
     },
 });

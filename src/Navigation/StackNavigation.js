@@ -10,20 +10,21 @@ import FeedBack from '../Screens/FeedBack/FeedBack';
 import SplashScreen from '../Screens/SplashScreen/SplashScreen';
 import Downloads from '../Screens/Downloads/Downloads';
 
+
 const Stack = createNativeStackNavigator();
 
 export default class StackNavigation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showSplash: true,
+      showSplash: true, // show splash screen
     };
   }
 
   componentDidMount() {
     setTimeout(() => {
       this.setState({ showSplash: false });
-    }, 3000);
+    }, 1800);
   }
 
 

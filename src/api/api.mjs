@@ -1,9 +1,11 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import RNFetchBlob from 'rn-fetch-blob';
+import * as mime from 'mime'
+import { uploadFiles, DocumentDirectoryPath } from "react-native-fs";
 
 
-axios.defaults.baseURL = 'http://192.168.10.4:8001/';
+axios.defaults.baseURL = 'http://172.0.5.191:8001/';
 
 
 const generateAssignment = ({ title, successCallback, errorCallback }) => {
@@ -16,6 +18,7 @@ const generateAssignment = ({ title, successCallback, errorCallback }) => {
     }
   )
     .then((response) => {
+      console.log(response);
       successCallback(response.data);
     })
     .catch((error) => {
@@ -24,31 +27,49 @@ const generateAssignment = ({ title, successCallback, errorCallback }) => {
 }
 
 
-const generateNotes = ({ filePath, actionCode, successCallback, errorCallback }) => {
-  let formData = new FormData();
-  RNFetchBlob.fs.readFile(filePath)
-    .then((content) => {
-      formData.append('file', content, filePath);
+const generateNotes = async ({ filePath, fileName, actionCode, progress, successCallback, errorCallback }) => {
 
-      axios.post(
-        `/generate_notes`,
-        formData,
-        {
-          params: { action_code: actionCode },
-          headers: { 'Content-Type': 'multipart/form-data' }
+  const files = [
+    {
+      name: 'file',
+      filename: fileName,
+      filepath: filePath,
+      filetype: mime.getType(filePath),
+    },
+  ];
+
+  try {
+
+    uploadFiles({
+      toUrl: `${axios.defaults.baseURL}generate_notes?action_code=${actionCode}`,
+      files: files,
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      progress: (resp) => {
+        const p = (resp.totalBytesSent / resp.totalBytesExpectedToSend) * 100;
+        if (p > 99.0) {
+          progress(100);
         }
-      )
-        .then((response) => {
-          successCallback(response.data);
-        })
-        .catch((error) => {
-          errorCallback(error);
-        });
+        else {
+          progress(p);
+        }
+      }
     })
-    .catch((error) => {
-      errorCallback(error);
-    });
+      .promise.then((response) => {
+        // after the file is uploaded, the server will respond with the file url
+        successCallback(JSON.parse(response.body));
+      })
+      .catch((error) => {
+        errorCallback(error);
+      });
+  }
+  catch (error) {
+    errorCallback(error);
+  }
 }
+
 
 // generateAssignment({
 //   title: 'Fingerprint',
@@ -62,8 +83,8 @@ const generateNotes = ({ filePath, actionCode, successCallback, errorCallback })
 
 // testing generateNotes
 // generateNotes({
-//   filePath: 'C:/Users/Huzaifa Farooq/Downloads/lecture_19.pptx',
-//   actionCode: '1',
+//   filePath: '/storage/emulated/0/Download/Lecture 02.pptx',
+//   actionCode: 1,
 //   successCallback: (data) => {
 //     console.log(data);
 //   },
@@ -71,6 +92,7 @@ const generateNotes = ({ filePath, actionCode, successCallback, errorCallback })
 //     console.error(error);
 //   },
 // });
+
 
 
 export { generateAssignment, generateNotes };

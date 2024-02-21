@@ -11,6 +11,72 @@ import { useEffect } from 'react';
 import RNFS from 'react-native-fs';
 
 import { DocumentView } from '../../Components/DocumentItem';
+import FileSelectButton from '../../Components/FileSelectButton';
+
+import { pdfMerge } from '../../utils/pdfMerge';
+
+
+import { PDFDocument } from 'pdf-lib';
+import RNFetchBlob from 'rn-fetch-blob';
+import { Buffer } from 'buffer';
+
+// merging pdfs
+const createPdf = async () => {
+    const pdfFiles = ['/storage/emulated/0/Download/Smartflow/lecture_19.pdf', '/storage/emulated/0/Download/Smartflow/lecture_19.pdf'];
+
+    // loading pdfs
+    const pdf1 = await PDFDocument.load(await RNFetchBlob.fs.readFile(pdfFiles[0], 'base64'));
+    const pdf2 = await PDFDocument.load(await RNFetchBlob.fs.readFile(pdfFiles[1], 'base64'));
+    // // merging both pdfs
+    const pdf = await PDFDocument.create();
+
+    // first adding all pages of first pdf
+    const pages1 = await pdf.copyPages(pdf1, pdf1.getPageIndices());
+    [pdf1, pdf2].forEach(async (pdf) => {
+        const pages = await pdf.copyPages(pdf, pdf.getPageIndices());
+        pages.forEach(page => {
+            pdf.addPage(page);
+        });
+    });
+    
+    pages1.forEach(page => {
+        pdf.addPage(page);
+    });
+    // then adding all pages of second pdf
+    const pages2 = await pdf.copyPages(pdf2, pdf2.getPageIndices());
+    pages2.forEach(page => {
+        pdf.addPage(page);
+    });
+
+    const pdfBytes = await pdf.save();
+
+    const base64 = Buffer.from(pdfBytes).toString('base64');
+    console.log('====================================');
+    console.log(base64);
+    console.log('====================================');
+    // await RNFS.writeFile('/storage/emulated/0/Download/sample.pdf', blob, 'base64');
+    await RNFetchBlob.fs.writeFile('/storage/emulated/0/Download/Smartflow/a.pdf', base64, 'base64').then(() => {
+        console.log('file created');
+    }).catch(error => {
+        console.log(error);
+    })
+};
+
+createPdf();
+
+// const pdfFiles = ['/storage/emulated/0/Download/Smartflow/lecture_19.pdf', '/storage/emulated/0/Download/Smartflow/lecture_19.pdf'];
+
+// pdfMerge({
+//     pdfFiles,
+//     outputFilePath: '/storage/emulated/0/Download/Smartflow/merged.pdf',
+//     successCallback: (resp) => {
+//         console.log(resp);
+//     },
+//     errorCallback: (error) => {
+//         console.log(error)
+//     }
+
+// })
 
 
 const Home = ({ navigation }) => {
@@ -77,8 +143,6 @@ const Home = ({ navigation }) => {
                     iconBackgroundColor={"#c9f2ca"}
                     onPress={() => navigation.navigate("Assignments")}
                 />
-
-
             </View>
             <View style={{
                 flexDirection: 'row',
@@ -112,8 +176,6 @@ const Home = ({ navigation }) => {
                     iconColor={'#E28C20'}
                     iconBackgroundColor={"#ebeda8"}
                     onPress={() => navigation.navigate("Downloads")}
-
-
                 />
             </View>
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>

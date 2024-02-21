@@ -1,37 +1,44 @@
 //import libraries
 import CustomHeader from '../../Components/CustomHeader';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, PermissionsAndroid } from 'react-native'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Pressable, TouchableHighlight, Image, PermissionsAndroid } from 'react-native'
 import { React, useState, useEffect } from 'react'
 import RNFS from 'react-native-fs'
 import FileViewer from "react-native-file-viewer";
 import Banner from '../../Components/BannersAd/Banner';
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, searchFilesArray, loadFiles } from '../../utils/utils.mjs';
+import SearchBar from "react-native-dynamic-search-bar";
 
 
 // create a component
 const Downloads = ({ navigation }) => {
     const [result, setresult] = useState([]);
+    const [search, setSearch] = useState('');
+
     useEffect(() => {
         folderReader();
     }, [])
 
     const folderReader = async () => {
-        const file = RNFS.DownloadDirectoryPath + '/SmartFlow';
-        const result = RNFS.readDir(file).then(res => {
-            console.log(res);
-            setresult(res);
-            console.log(result);
-            console.log(RNFS.DownloadDirectoryPath + '/SmartFlow')
-        }).catch(error => {
-            console.log(error);
-        })
+        const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
+        const result = await loadFiles({ directoryPath: directory });
+        setresult(result);
+
+        // const result = RNFS.readDir(file).then(res => {
+
+        //     console.log(res);
+        //     setresult(res);
+        // }).catch(error => {
+        //     console.log(error);
+        // })
     };
 
     const Fileopener = (path) => {
-        const display = FileViewer.open(path);
+        const display = FileViewer.open(path, { showOpenWithDialog: true })
     };
+
+    const files = search ? searchFilesArray({ files: result, query: search }) : result;
 
     return (
         <View style={styles.container}>
@@ -39,15 +46,39 @@ const Downloads = ({ navigation }) => {
                 icon={"keyboard-backspace"}
                 onPress={() => navigation.goBack()}
             />
-            <View style={{height:'79%', margin: 10, paddingTop: 2, borderWidth:2, borderColor:'#e1ebe4', borderRadius: 10 }}>
-                <FlatList data={result} renderItem={({ item, index }) => {
-                    return (
-                        <TouchableOpacity onPress={() => { Fileopener(item.path) }}>
-                            <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item)} />
-                        </TouchableOpacity>
-                    )
-                }} />
-            </View>
+            <SearchBar
+                style={{
+                    width: '90%',
+                    marginTop: 10,
+                    borderRadius: 10,
+                }}
+                placeholder="Search"
+                onChangeText={(text) => setSearch(text)}
+                onClearPress={() => setSearch("")}
+                // use default if there is search text for clearIconComponent otherwise don't use it
+                clearIconComponent={search ? null : <></>}
+                searchIconImageStyle={{ tintColor: 'black' }}
+                clearIconImageStyle={{ tintColor: 'black' }}
+            />
+            {files.length ? (
+                <View style={{ height: '79%', margin: 10, paddingTop: 2, borderWidth: 2, borderColor: '#e1ebe4', borderRadius: 10 }}>
+                    <FlatList
+                        data={files}
+                        renderItem={({ item, index }) => {
+                            return (
+                                <TouchableHighlight underlayColor={''} onPress={() => { Fileopener(item.path) }}>
+                                    <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
+                                </TouchableHighlight>
+                            )
+                        }} />
+                </View>
+            ) : (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}>No files found.</Text>
+                </View>
+            )
+            }
+
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                 <Banner />
             </View>
