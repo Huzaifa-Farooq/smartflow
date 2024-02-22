@@ -1,10 +1,12 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
+import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
 
-export const DocumentItem = ({ iconSrc, title, size }) => {
+export const DocumentItem = ({ iconSrc, title, size, selected, selectedNumber }) => {
     return (
         <View style={styles.container}>
+            <View style={styles.fileInfoContainer}>
             <View style={styles.iconContainer}>
                 <Image source={iconSrc} style={styles.icon} />
             </View>
@@ -12,10 +14,26 @@ export const DocumentItem = ({ iconSrc, title, size }) => {
                 <Text numberOfLines={2} ellipsizeMode='tail' style={styles.title}>{title}</Text>
                 <Text style={styles.size}>{size}</Text>
             </View>
+            </View>
+            {
+                (selected && selectedNumber) && (
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                        <View 
+                            style={{ 
+                                ...styles.iconContainer, 
+                                borderRadius: 100,
+                                backgroundColor: '#00B0F0',
+                                width: 20, 
+                                height: 20,
+                            }}>
+                            <Text style={{ color: '#fff' }}>{selectedNumber}</Text>
+                            </View>
+                    </View>
+                )
+            }
         </View>
     );
 }
-
 
 styles = StyleSheet.create({
     container: {
@@ -26,6 +44,11 @@ styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: '#fff',
         elevation: 5,
+    },
+    fileInfoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '90%'
     },
     iconContainer: {
         width: 50,
@@ -52,4 +75,6 @@ styles = StyleSheet.create({
         fontSize: 11,
         color: '#777777'
     },
+
+
 });

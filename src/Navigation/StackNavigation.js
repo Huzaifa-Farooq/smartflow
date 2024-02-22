@@ -9,6 +9,7 @@ import DrawerNavigation from './DrawerNavigation';
 import FeedBack from '../Screens/FeedBack/FeedBack';
 import SplashScreen from '../Screens/SplashScreen/SplashScreen';
 import Downloads from '../Screens/Downloads/Downloads';
+import PDFMerge from '../Screens/PDFMerge/PDFMerge';
 
 
 const Stack = createNativeStackNavigator();
@@ -43,6 +44,8 @@ export default class StackNavigation extends React.Component {
               <Stack.Screen name='Presentations' component={Presentation} options={{ headerShown: false }}
               />
               <Stack.Screen name='Downloads' component={Downloads} options={{ headerShown: false }}
+              />
+              <Stack.Screen name='PDFMerge' component={PDFMerge} options={{ headerShown: false }}
               />
               <Stack.Screen name='Assignments' component={Assignment} options={{ headerShown: false }}
               />

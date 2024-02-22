@@ -7,7 +7,7 @@ import FileViewer from "react-native-file-viewer";
 import Banner from '../../Components/BannersAd/Banner';
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize, searchFilesArray, loadFiles } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../../utils/utils.mjs';
 import SearchBar from "react-native-dynamic-search-bar";
 
 
@@ -23,15 +23,12 @@ const Downloads = ({ navigation }) => {
     const folderReader = async () => {
         const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
         const result = await loadFiles({ directoryPath: directory });
-        setresult(result);
+        setresult(sortFilesArray({
+            files: result,
+            sortBy: 'date',
+            reversed: true
 
-        // const result = RNFS.readDir(file).then(res => {
-
-        //     console.log(res);
-        //     setresult(res);
-        // }).catch(error => {
-        //     console.log(error);
-        // })
+        }));
     };
 
     const Fileopener = (path) => {
@@ -60,24 +57,22 @@ const Downloads = ({ navigation }) => {
                 searchIconImageStyle={{ tintColor: 'black' }}
                 clearIconImageStyle={{ tintColor: 'black' }}
             />
-            {files.length ? (
-                <View style={{ height: '79%', margin: 10, paddingTop: 2, borderWidth: 2, borderColor: '#e1ebe4', borderRadius: 10 }}>
-                    <FlatList
-                        data={files}
-                        renderItem={({ item, index }) => {
-                            return (
-                                <TouchableHighlight underlayColor={''} onPress={() => { Fileopener(item.path) }}>
-                                    <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
-                                </TouchableHighlight>
-                            )
-                        }} />
-                </View>
-            ) : (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}>No files found.</Text>
-                </View>
-            )
-            }
+            <View style={{ height: '79%', margin: 10, paddingTop: 2, borderWidth: 2, borderColor: '#e1ebe4', borderRadius: 10 }}>
+                <FlatList
+                    ListEmptyComponent={() => (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
+                            <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}>No files found.</Text>
+                        </View>
+                    )}
+                    data={files}
+                    renderItem={({ item, index }) => {
+                        return (
+                            <TouchableHighlight underlayColor={''} onPress={() => { Fileopener(item.path) }}>
+                                <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
+                            </TouchableHighlight>
+                        )
+                    }} />
+            </View>
 
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                 <Banner />

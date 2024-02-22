@@ -105,25 +105,5 @@ const searchFilesArray = ({ files, query }) => {
 };
 
 
-export const connectedToInternet = () => {
-    return new Promise((resolve, reject) => {
-        fetch('https://www.google.com', {
-            method: 'GET',
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-            },
-        }).then((res) => {
-            resolve(true);
-        }).catch((err) => {
-            resolve(false);
-        });
-    });
-
-}
-
-
-
 // exporting functions
 export { isPdf, formatSize, getFileIcon, loadFiles, sortFilesArray, reverseArray, searchFilesArray };

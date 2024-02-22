@@ -10,8 +10,9 @@ const pathMap = {
     'fileSearch': require('../assets/animations/fileSearch.json'),
     'writeOnPage': require('../assets/animations/writeOnPage.json'), 
     'splashScreen': require('../assets/animations/splashScreen.json'),
+    'wait': require('../assets/animations/wait.json'),
     // 'loading': require('../assets/animations/loading.json'),
-    // 'success': require('../assets/animations/success.json'),
+    'success': require('../assets/animations/success.json'),
 };
 
 
