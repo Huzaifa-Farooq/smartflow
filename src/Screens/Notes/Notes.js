@@ -1,15 +1,13 @@
 //import liraries
 import {
-    StyleSheet, Text, View, FlatList, PermissionsAndroid, TouchableHighlight, TouchableOpacity,
-    ActivityIndicator
+    StyleSheet, Text, View, FlatList, TouchableHighlight,
+    ActivityIndicator, RefreshControl, Animated
 } from 'react-native';
 import { React, useState, useEffect, useRef, useCallback } from 'react'
 import RNFS from 'react-native-fs';
 import CustomHeader from '../../Components/CustomHeader';
 import Banner from '../../Components/BannersAd/Banner';
 import FileViewer from "react-native-file-viewer";
-
-import SearchBar from "react-native-dynamic-search-bar";
 
 import { DocumentItem } from '../../Components/DocumentItem';
 import { getFileIcon, formatSize, sortFilesArray, searchFilesArray } from '../../utils/utils.mjs';
@@ -18,9 +16,9 @@ import { generateNotes } from '../../api/api.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
 import FileSelectButton from '../../Components/FileSelectButton';
 import DocumentPicker from 'react-native-document-picker';
-import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
-import AnimatedIcon from '../../Components/AnimatedIcon';
 import NotesProgressModal from '../../Components/NotesProgressModal';
+import { ListEmptyComponent, CustomSearchBarView, FileLoadingComponent } from '../../Components/FilesList';
+import { animatedFilesListViewStyle } from '../../styles/styles';
 
 
 // import { startBackgroundService } from '../../utils/background_tasks';
@@ -38,41 +36,47 @@ const Notes = ({ navigation }) => {
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState(null);
     const [search, setSearch] = useState('');
+    const [initialLoading, setInitialLoading] = useState(true);
+
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const diffClamp = Animated.diffClamp(scrollY, 0, 100);
+
+    const translateY = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [0, -60],
+        extrapolate: 'clamp',
+    });
+
+    const opacity = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+    });
+
+    const marginTop = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [0, -30],
+        extrapolate: 'clamp',
+    });
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setInitialLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const Fileopener = (path) => {
         FileViewer.open(path, { showOpenWithDialog: true })
     };
 
     useEffect(() => {
-        requestPermission();
+        fetchPptFiles();
     }, []);
 
-    const requestPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-                {
-                    title: 'Storage Permission',
-                    message:
-                        'Apps need to access storage ',
-                    buttonNeutral: 'Ask Me Later',
-                    buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                },
-            );
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                console.log("granted")
-                fetchPptFiles();
-            } else {
-                console.log('Storage permission denied');
-            }
-        } catch (err) {
-            console.warn(err);
-        }
-    };
-
     const fetchPptFiles = async () => {
+        setLoading(true);
         const files = await listPptFiles();
         setPptFiles(files);
         setLoading(false);
@@ -208,9 +212,15 @@ const Notes = ({ navigation }) => {
             });
     };
 
+    const renderListItem = ({ item, index }) => {
+        return (
+            <TouchableHighlight onPress={() => handleFileSelect(item)} underlayColor={'white'}  >
+                <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
+            </TouchableHighlight>
+        )
+    }
 
     const files = search ? searchFilesArray({ files: pptFiles, query: search }) : pptFiles;
-
 
     // if there are no files and loading is false, then there are no ppt files in the device
     if (pptFiles.length === 0 && !loading) {
@@ -227,17 +237,14 @@ const Notes = ({ navigation }) => {
         )
     }
     // if loading is true and no files are found, then show loading indicator
-    if (loading && files.length === 0) {
+    if ((loading && files.length === 0) || initialLoading) {
         return (
             <View style={styles.container}>
                 <CustomHeader title={'Notes'}
                     icon={"keyboard-backspace"}
                     onPress={() => navigation.goBack()}
                 />
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <AnimatedIcon name='fileSearch' style={{ width: 150, height: 150 }} />
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Loading...</Text>
-                </View>
+                <FileLoadingComponent />
             </View>
         )
     }
@@ -255,45 +262,32 @@ const Notes = ({ navigation }) => {
                     allowMultiSelection={false}
                     onFileSelect={(file) => handleFileSelect(file)}
                 />
-                <SearchBar
-                    style={{
-                        width: '90%',
-                        marginTop: 10,
-                        borderRadius: 10,
-                    }}
-                    placeholder="Search"
+                <CustomSearchBarView
                     onChangeText={(text) => setSearch(text)}
-                    onClearPress={() => setSearch("")}
-                    // use default if there is search text for clearIconComponent otherwise don't use it
-                    clearIconComponent={search ? null : <></>}
-                    searchIconImageStyle={{ tintColor: 'black' }}
-                    clearIconImageStyle={{ tintColor: 'black' }}
+                    onClearPress={() => setSearch('')}
+                    search={search}
+                    viewStyle={{ transform: [{ translateY }] }}
+                    searchBarStyle={{ opacity: opacity }}
                 />
-
-                <View style={{ height: '79%', margin: 10, paddingTop: 2, borderWidth: 2, borderColor: '#e1ebe4', borderRadius: 10 }}>
-                    <FlatList
-                        data={sortFilesArray({ files: files, mode: 'date', reversed: true })}
-                        ListFooterComponent={() => (
-                            (loading && files.length > 0) && (
-                                <View style={{ justifyContent: 'center', alignItems: 'center', paddingTop: 10, paddingBottom: 10 }}>
-                                    <ActivityIndicator size='small' color='black' />
-                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: 'black' }}>Loading...</Text>
-                                </View>
-                            )
-                            )
+                <View style={animatedFilesListViewStyle}>
+                    <Animated.FlatList
+                        style={{ marginTop }}
+                        refreshControl={
+                            <RefreshControl
+                                tintColor="#deb018"
+                                onRefresh={() => { fetchPptFiles() }}
+                                refreshing={false}
+                            />
                         }
-                        ListEmptyComponent={() => (
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                <Text style={{ color: '#000', fontSize: 14 }}>No files to display</Text>
-                            </View>
-                        )}
-                        renderItem={({ item }) => {
-                            return (
-                                <TouchableHighlight onPress={() => handleFileSelect(item)} underlayColor={'white'}  >
-                                    <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
-                                </TouchableHighlight>
-                            )
+                        bounces={true}
+                        onScroll={(e) => {
+                            if (e.nativeEvent.contentOffset.y > 0)
+                                scrollY.setValue(e.nativeEvent.contentOffset.y);
                         }}
+                        data={sortFilesArray({ files: files, mode: 'date', reversed: true })}
+                        ListFooterComponent={<ListFooter loading={loading} files={files} />}
+                        ListEmptyComponent={<ListEmptyComponent />}
+                        renderItem={renderListItem}
                     />
 
                     {
@@ -319,52 +313,6 @@ const Notes = ({ navigation }) => {
                         />
                     }
 
-                    {/* {
-                        uploadProgress > 0 && uploadProgress < 100 && (
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                <AnimatedIcon name='fileUpload' style={{ width: 200, height: 200 }} />
-                                <Text style={{ fontSize: 14, fontWeight: 'bold' }}>Uploading file...</Text>
-                                <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{uploadProgress.toFixed(2)}%</Text>
-                            </View>
-                        )
-                    }
-
-                    {
-                        (
-                            requestInProgress &&
-                            (uploadProgress == 0 || uploadProgress == 100) &&
-                            (downloadProgress == 0 || downloadProgress == 100)
-                        ) && (
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                <ActivityIndicator color='#009b88' size='large' />
-                                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Generating assignment...</Text>
-                            </View>
-                        )
-                    }
-
-                    {
-                        (downloadProgress > 0 && downloadProgress < 100) && (
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                <ActivityIndicator color='#009b88' size='large' />
-                                <Text style={{ fontSize: 14, fontWeight: 'bold' }}>Downloading file...</Text>
-                                <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{downloadProgress.toFixed(2)}%</Text>
-                            </View>
-                        )
-                    }
-
-                    {
-                        (downloadedFile && downloadProgress == 100) && (
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                <TouchableHighlight
-                                    underlayColor={'white'}
-                                    onPress={() => Fileopener(downloadedFile.path)}
-                                >
-                                    <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
-                                </TouchableHighlight>
-                            </View>
-                        )
-                    } */}
-
                     {
                         (error) && (
                             <ErrorDialog
@@ -381,6 +329,18 @@ const Notes = ({ navigation }) => {
         );
     }
 };
+
+const ListFooter = ({ loading, files }) => {
+    return (
+        (loading && files.length > 0) && (
+            <View style={{ justifyContent: 'center', alignItems: 'center', paddingTop: 10, paddingBottom: 10 }}>
+                <ActivityIndicator size='small' color='black' />
+                <Text style={{ fontSize: 11, fontWeight: 'bold', color: 'black' }}>Loading...</Text>
+            </View>
+        )
+    )
+}
+
 
 
 const styles = StyleSheet.create({

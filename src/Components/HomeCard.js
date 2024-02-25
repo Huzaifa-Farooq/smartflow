@@ -3,9 +3,10 @@ import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-nati
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
+
 const { height, width } = Dimensions.get('window');
 
-const HomeCard = ({ iconName, txt, iconColor, iconBackgroundColor,onPress }) => {
+const HomeCard = ({ iconName, txt, iconColor, iconBackgroundColor, onPress, topRightIconName }) => {
     return (
         <TouchableOpacity onPress={onPress} style={[styles.container,{ backgroundColor: iconBackgroundColor }]}>
             <View style={styles.iconContainer}>
@@ -14,6 +15,12 @@ const HomeCard = ({ iconName, txt, iconColor, iconBackgroundColor,onPress }) => 
             <View style={styles.textContainer}>
                 <Text style={styles.text}>{txt}</Text>
             </View>
+            {topRightIconName && (
+                <View style={styles.topRightIconContainer}>
+                    <MaterialCommunityIcons name={topRightIconName} size={20} color={iconColor} />
+                </View>
+            )}
+
         </TouchableOpacity>
     );
 };
@@ -54,5 +61,12 @@ const styles = StyleSheet.create({
         color: '#000',
         fontWeight:'bold'
         
+    },
+    topRightIconContainer: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

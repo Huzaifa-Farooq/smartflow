@@ -6,24 +6,26 @@ import HomeCard from '../../Components/HomeCard';
 import HomeCardTwo from '../../Components/HomeCardTwo';
 import HomeCardThree from '../../Components/HomeCardThree';
 import Banner from '../../Components/BannersAd/Banner';
-import { request, PERMISSIONS } from 'react-native-permissions';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import RNFS from 'react-native-fs';
 
-import { DocumentView } from '../../Components/DocumentItem';
-import FileSelectButton from '../../Components/FileSelectButton';
-import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
-
+import ErrorDialog from '../../Components/ErrorDialog';
+import NetInfo from '@react-native-community/netinfo';
 
 
 const Home = ({ navigation }) => {
+    const [isConnected, setIsConnected] = useState(false);
+    const [error, setError] = useState('');
+
     const handleToggle = () => {
         navigation.openDrawer();
     }
+
     useEffect(() => {
         requestPermission();
-
+        networkchecker();
     }, []);
+
     const requestPermission = async () => {
         try {
             const granted = await PermissionsAndroid.request(
@@ -31,8 +33,7 @@ const Home = ({ navigation }) => {
                 PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                 {
                     title: 'Storage Permission',
-                    message:
-                        'Apps need to access storage ',
+                    message: 'Apps need to access storage ',
                     buttonNeutral: 'Ask Me Later',
                     buttonNegative: 'Cancel',
                     buttonPositive: 'OK',
@@ -48,6 +49,26 @@ const Home = ({ navigation }) => {
         }
     };
 
+    const networkchecker = () => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            setIsConnected(state.isConnected);
+            console.log("checking internet connection : " + state.isConnected);
+        });
+
+        return () => unsubscribe();
+    };
+
+    const handleNavigation = (path) => {
+        console.log('====================================');
+        console.log(isConnected);
+        console.log('====================================');
+        if (isConnected) {
+            navigation.navigate(path);
+        } else if (!isConnected) {
+            setError("No internet connection");
+        }
+    };
+
     const createfolder = async () => {
         const file = RNFS.DownloadDirectoryPath + '/SmartFlow/';
         RNFS.mkdir(file).then(res => {
@@ -57,7 +78,6 @@ const Home = ({ navigation }) => {
             console.log(error);
         })
     };
-
 
     return (
         <View style={{ flex: 1 }}>
@@ -72,13 +92,15 @@ const Home = ({ navigation }) => {
                     iconName='book-open-page-variant-outline'
                     iconColor={'#09C3B6'}
                     iconBackgroundColor={"#bfe0dd"}
-                    onPress={() => navigation.navigate("Notes")}
+                    onPress={() => handleNavigation("Notes")}
+                    topRightIconName={isConnected ? null : 'wifi-off'}
                 />
                 <HomeCard txt={'Assignments'}
                     iconName='bookmark-multiple-outline'
                     iconColor={'#0BDA0B'}
                     iconBackgroundColor={"#c9f2ca"}
-                    onPress={() => navigation.navigate("Assignments")}
+                    onPress={() => handleNavigation("Assignments")}
+                    topRightIconName={isConnected ? null : 'wifi-off'}
                 />
             </View>
             <View style={{
@@ -87,7 +109,7 @@ const Home = ({ navigation }) => {
                 marginTop: 20
             }}>
                 <HomeCard txt={'PDFMerger'}
-                    iconName='checkbox-marked-circle-outline'
+                    iconName='file-document-multiple'
                     iconColor={'#E60FB7'}
                     iconBackgroundColor={"#E2D0DE"}
                     onPress={() => { navigation.navigate("PDFMerge") }}
@@ -104,7 +126,8 @@ const Home = ({ navigation }) => {
                     iconName='book-check-outline'
                     iconColor={'#2A3BE2'}
                     iconBackgroundColor={"#CDCEE0"}
-                    onPress={() => navigation.navigate("Presentations")}
+                    onPress={() => handleNavigation("Presentations")}
+                    topRightIconName={isConnected ? null : 'wifi-off'}
                 />
             </View>
             <View >
@@ -115,6 +138,9 @@ const Home = ({ navigation }) => {
                     onPress={() => navigation.navigate("Downloads")}
                 />
             </View>
+
+            { error && <ErrorDialog iconName='wifi-off' error={error} onClose={() => setError('')} /> }
+
 
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                 <Banner />

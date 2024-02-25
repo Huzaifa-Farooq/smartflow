@@ -1,7 +1,7 @@
 //import libraries
 import CustomHeader from '../../Components/CustomHeader';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Pressable, TouchableHighlight, Image, PermissionsAndroid } from 'react-native'
-import { React, useState, useEffect } from 'react'
+import { StyleSheet, Text, View, TouchableHighlight, Animated, RefreshControl } from 'react-native';
+import { React, useState, useEffect, useRef } from 'react';
 import RNFS from 'react-native-fs'
 import FileViewer from "react-native-file-viewer";
 import Banner from '../../Components/BannersAd/Banner';
@@ -9,33 +9,88 @@ import Banner from '../../Components/BannersAd/Banner';
 import { DocumentItem } from '../../Components/DocumentItem';
 import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../../utils/utils.mjs';
 import SearchBar from "react-native-dynamic-search-bar";
+import { ListEmptyComponent, CustomSearchBarView, ListFooterComponent, FileLoadingComponent } from '../../Components/FilesList';
+import { animatedFilesListViewStyle } from '../../styles/styles';
+
 
 
 // create a component
 const Downloads = ({ navigation }) => {
     const [result, setresult] = useState([]);
     const [search, setSearch] = useState('');
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
+
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const diffClamp = Animated.diffClamp(scrollY, 0, 100);
+
+    const translateY = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [0, -60],
+        extrapolate: 'clamp',
+    });
+
+    const opacity = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+    });
+
+    const marginTop = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [0, -30],
+        extrapolate: 'clamp',
+    });
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setInitialLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         folderReader();
     }, [])
 
     const folderReader = async () => {
+        setLoading(true);
         const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
         const result = await loadFiles({ directoryPath: directory });
         setresult(sortFilesArray({
             files: result,
             sortBy: 'date',
             reversed: true
-
         }));
+        setLoading(false);
     };
 
     const Fileopener = (path) => {
         const display = FileViewer.open(path, { showOpenWithDialog: true })
     };
 
+    const renderListItem = ({ item, index }) => {
+        return (
+            <TouchableHighlight underlayColor={''} onPress={() => { Fileopener(item.path) }}>
+                <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
+            </TouchableHighlight>
+        )
+    }
+
     const files = search ? searchFilesArray({ files: result, query: search }) : result;
+
+    if (initialLoading) {
+        return (
+            <View style={styles.container}>
+                <CustomHeader title={'Downloads'}
+                    icon={"keyboard-backspace"}
+                    onPress={() => navigation.goBack()}
+                />
+                <FileLoadingComponent />
+            </View>
+        )
+    }
 
     return (
         <View style={styles.container}>
@@ -43,35 +98,34 @@ const Downloads = ({ navigation }) => {
                 icon={"keyboard-backspace"}
                 onPress={() => navigation.goBack()}
             />
-            <SearchBar
-                style={{
-                    width: '90%',
-                    marginTop: 10,
-                    borderRadius: 10,
-                }}
-                placeholder="Search"
+            <CustomSearchBarView
                 onChangeText={(text) => setSearch(text)}
-                onClearPress={() => setSearch("")}
-                // use default if there is search text for clearIconComponent otherwise don't use it
-                clearIconComponent={search ? null : <></>}
-                searchIconImageStyle={{ tintColor: 'black' }}
-                clearIconImageStyle={{ tintColor: 'black' }}
+                onClearPress={() => setSearch('')}
+                search={search}
+                viewStyle={{ transform: [{ translateY }] }}
+                searchBarStyle={{ opacity: opacity }}
             />
-            <View style={{ height: '79%', margin: 10, paddingTop: 2, borderWidth: 2, borderColor: '#e1ebe4', borderRadius: 10 }}>
-                <FlatList
-                    ListEmptyComponent={() => (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
-                            <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}>No files found.</Text>
-                        </View>
-                    )}
+            { loading && <FileLoadingComponent /> }
+            <View style={animatedFilesListViewStyle}>
+                <Animated.FlatList 
+                    style={{ marginTop }}
+                    refreshControl={
+                        <RefreshControl
+                            tintColor="#deb018"
+                            onRefresh={() => {folderReader()}}
+                            refreshing={false}
+                        />
+                    }
+                    bounces={true}
                     data={files}
-                    renderItem={({ item, index }) => {
-                        return (
-                            <TouchableHighlight underlayColor={''} onPress={() => { Fileopener(item.path) }}>
-                                <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
-                            </TouchableHighlight>
-                        )
-                    }} />
+                    onScroll={(e) => {
+                        if (e.nativeEvent.contentOffset.y > 0)
+                            scrollY.setValue(e.nativeEvent.contentOffset.y);
+                    }}
+                    ListEmptyComponent={<ListEmptyComponent />}
+                    ListFooterComponent={<ListFooterComponent height={20} />}
+                    renderItem={renderListItem}
+                />
             </View>
 
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>

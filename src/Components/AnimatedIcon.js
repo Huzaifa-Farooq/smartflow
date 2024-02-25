@@ -24,9 +24,6 @@ const AnimatedIcon = ({ name, style, loop=true }) => {
         };
     }
 
-console.log('====================================');
-console.log('name: '  + name);
-console.log('====================================');
     return (
         <LottieView 
             source={pathMap[name]}

@@ -7,7 +7,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
 
-export default ErrorDialog = ({ onClose, error }) => {
+export default ErrorDialog = ({ onClose, error, iconName="alert-circle" }) => {
     // stringify error
     console.log('====================================');
     console.log('ErrorDialog', error);
@@ -29,7 +29,7 @@ export default ErrorDialog = ({ onClose, error }) => {
                             source={require('../assets/Images/error.png')}
                         /> */}
                         <MaterialCommunityIcons
-                            name="alert-circle"
+                            name={iconName}
                             color="#ff0000"
                             size={60}
                             style={{ ...styles.errorIcon, height: 60, width: 60 }}
@@ -71,14 +71,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         padding: 10,
-        textAlign: 'center'
+        textAlign: 'center',
     },
     modalContent: {
         backgroundColor: '#fff',
         width: '90%',
+        height: 200,
         padding: 20,
         borderRadius: 10,
-        elevation: 5
+        elevation: 5,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     errorIcon: {
         width: 50,

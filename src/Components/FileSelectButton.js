@@ -1,7 +1,8 @@
 import React from 'react';
 import {
-    StyleSheet, Text, View, FlatList, PermissionsAndroid, TouchableHighlight, TouchableOpacity,
-    ActivityIndicator,
+    StyleSheet, 
+    View, 
+    TouchableOpacity, 
     Dimensions
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
@@ -15,13 +16,18 @@ export default FileSelectButton = ({ onFileSelect, allowedTypes, allowMultiSelec
         allowedTypes = DocumentPicker.types.allFiles;
     }
 
+    console.log('====================================');
+    console.log('allowedTypes', allowedTypes);
+    console.log('====================================');
+
     const handlePress = async () => {
         try {
-            const files = await DocumentPicker.pick({
+            const file = await DocumentPicker.pickSingle({
                 type: allowedTypes,
-                allowMultiSelection: allowMultiSelection
+                allowMultiSelection: allowMultiSelection,
+                transitionStyle: 'coverVertical',
             });
-            onFileSelect(files[0]);
+            onFileSelect(file);
         } catch (err) {
             if (DocumentPicker.isCancel(err)) {
                 console.log('====================================');
