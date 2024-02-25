@@ -1,13 +1,19 @@
 // dialog box to display error with icon
 import { 
-    View, Image, Text, StyleSheet, Modal, 
-    TouchableOpacity, TouchableWithoutFeedback,
+    View, Text, StyleSheet, Modal, 
+    TouchableWithoutFeedback,
     Pressable
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
 
-export default ErrorDialog = ({ onClose, error, iconName="alert-circle" }) => {
+export default ErrorDialog = ({ 
+    onClose, 
+    error, 
+    iconName = "alert-circle", 
+    iconColor = "#ff0000",
+    textColor = '#ff0000',
+}) => {
     // stringify error
     console.log('====================================');
     console.log('ErrorDialog', error);
@@ -30,18 +36,18 @@ export default ErrorDialog = ({ onClose, error, iconName="alert-circle" }) => {
                         /> */}
                         <MaterialCommunityIcons
                             name={iconName}
-                            color="#ff0000"
+                            color={iconColor}
                             size={60}
                             style={{ ...styles.errorIcon, height: 60, width: 60 }}
                         />
-                        <Text style={styles.errorText}>{error}</Text>
+                        <Text style={{ ...styles.errorText, color: textColor }}>{error}</Text>
                         <Pressable
                             style={styles.crossButton}
                             onPress={onClose}>
                             <MaterialCommunityIcons 
-                                name="close-circle-outline" 
+                                name="close-circle-outline"
                                 size={20} 
-                                color="black" 
+                                color="black"
                             />
                         </Pressable>
                     </View>
@@ -67,7 +73,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     errorText: {
-        color: '#ff0000',
         fontSize: 16,
         fontWeight: 'bold',
         padding: 10,
@@ -76,7 +81,7 @@ const styles = StyleSheet.create({
     modalContent: {
         backgroundColor: '#fff',
         width: '90%',
-        height: 200,
+        height: 180,
         padding: 20,
         borderRadius: 10,
         elevation: 5,
