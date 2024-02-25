@@ -39,6 +39,9 @@ const Home = ({ navigation }) => {
                     buttonPositive: 'OK',
                 },
             );
+            console.log('====================================');
+            console.log(granted);
+            console.log('====================================');
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 createfolder();
             } else {
@@ -139,7 +142,7 @@ const Home = ({ navigation }) => {
                 />
             </View>
 
-            { error && <ErrorDialog iconName='wifi-off' error={error} onClose={() => setError('')} /> }
+            { error && <ErrorDialog iconColor='black' textColor='black' iconName='wifi-off' error={error} onClose={() => setError('')} /> }
 
 
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>

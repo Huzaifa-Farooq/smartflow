@@ -82,8 +82,14 @@ const Notes = ({ navigation }) => {
         setLoading(false);
     };
 
-    const listPptFiles = useCallback(async (directoryPath = RNFS.DownloadDirectoryPath) => {
+    const listPptFiles = useCallback(async (directoryPath = RNFS.ExternalStorageDirectoryPath) => {
+        console.log('====================================');
+        console.log(directoryPath);
+        console.log('====================================');
         const fileNames = await RNFS.readDir(directoryPath);
+        console.log('====================================');
+        console.log(fileNames);
+        console.log('====================================');
         const requiredFiles = [];
         const visitedDirectories = [];
         const directoriesToSkip = [

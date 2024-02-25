@@ -1,160 +1,72 @@
-//import liraries
+
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { View, Text, StyleSheet, StatusBar, PermissionsAndroid } from 'react-native';
-import CustomHeader from '../../Components/CustomHeader';
-import HomeCard from '../../Components/HomeCard';
-import HomeCardTwo from '../../Components/HomeCardTwo';
-import HomeCardThree from '../../Components/HomeCardThree';
-import Banner from '../../Components/BannersAd/Banner';
-import { useEffect, useState } from 'react';
-import RNFS from 'react-native-fs';
-
-import ErrorDialog from '../../Components/ErrorDialog';
-import NetInfo from '@react-native-community/netinfo';
+import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
 
-const Home = ({ navigation }) => {
-    const [isConnected, setIsConnected] = useState(false);
-    const [error, setError] = useState('');
+const { height, width } = Dimensions.get('window');
 
-    const handleToggle = () => {
-        navigation.openDrawer();
-    }
-
-    useEffect(() => {
-        requestPermission();
-        networkchecker();
-    }, []);
-
-    const requestPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-                {
-                    title: 'Storage Permission',
-                    message: 'Apps need to access storage ',
-                    buttonNeutral: 'Ask Me Later',
-                    buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                },
-            );
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                createfolder();
-            } else {
-                console.log('Storage permission denied');
-            }
-        } catch (err) {
-            console.warn(err);
-        }
-    };
-
-    const networkchecker = () => {
-        const unsubscribe = NetInfo.addEventListener(state => {
-            setIsConnected(state.isConnected);
-            console.log("checking internet connection : " + state.isConnected);
-        });
-
-        return () => unsubscribe();
-    };
-
-    const handleNavigation = (path) => {
-        console.log('====================================');
-        console.log(isConnected);
-        console.log('====================================');
-        if (isConnected) {
-            navigation.navigate(path);
-        } else if (!isConnected) {
-            setError("No internet connection");
-        }
-    };
-
-    const createfolder = async () => {
-        const file = RNFS.DownloadDirectoryPath + '/SmartFlow/';
-        RNFS.mkdir(file).then(res => {
-            console.log('folder created');
-            console.log(RNFS.DownloadDirectoryPath + '/SmartFlow/');
-        }).catch(error => {
-            console.log(error);
-        })
-    };
-
+const HomeCard = ({ iconName, txt, iconColor, iconBackgroundColor, onPress, topRightIconName }) => {
     return (
-        <View style={{ flex: 1 }}>
-            <StatusBar backgroundColor="#deb018" barStyle="dark-content" />
-            <CustomHeader title="SmartFlow" icon={"menu"} onPress={handleToggle} />
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                marginTop: 20
-            }}>
-                <HomeCard txt={'Notes'}
-                    iconName='book-open-page-variant-outline'
-                    iconColor={'#09C3B6'}
-                    iconBackgroundColor={"#bfe0dd"}
-                    onPress={() => handleNavigation("Notes")}
-                    topRightIconName={isConnected ? null : 'wifi-off'}
-                />
-                <HomeCard txt={'Assignments'}
-                    iconName='bookmark-multiple-outline'
-                    iconColor={'#0BDA0B'}
-                    iconBackgroundColor={"#c9f2ca"}
-                    onPress={() => handleNavigation("Assignments")}
-                    topRightIconName={isConnected ? null : 'wifi-off'}
-                />
+        <TouchableOpacity onPress={onPress} style={[styles.container,{ backgroundColor: iconBackgroundColor }]}>
+            <View style={styles.iconContainer}>
+                <MaterialCommunityIcons name={iconName} size={40} color={iconColor} />
             </View>
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                marginTop: 20
-            }}>
-                <HomeCard txt={'PDFMerger'}
-                    iconName='file-document-multiple'
-                    iconColor={'#E60FB7'}
-                    iconBackgroundColor={"#E2D0DE"}
-                    onPress={() => { navigation.navigate("PDFMerge") }}
-                />
-                {/* <HomeCard txt={'FeedBack'}
-                    iconName='notebook-edit-outline'
-                    iconColor={'#2A3BE2'}
-                    iconBackgroundColor={"#CDCEE0"}
-                    onPress={() => navigation.navigate("FeedBack")}
-                /> */}
-
-
-                <HomeCard txt={'Presentations'}
-                    iconName='book-check-outline'
-                    iconColor={'#2A3BE2'}
-                    iconBackgroundColor={"#CDCEE0"}
-                    onPress={() => handleNavigation("Presentations")}
-                    topRightIconName={isConnected ? null : 'wifi-off'}
-                />
+            <View style={styles.textContainer}>
+                <Text style={styles.text}>{txt}</Text>
             </View>
-            <View >
-                <HomeCardTwo txt={'Downloads'}
-                    iconName='download'
-                    iconColor={'#E28C20'}
-                    iconBackgroundColor={"#ebeda8"}
-                    onPress={() => navigation.navigate("Downloads")}
-                />
-            </View>
+            {topRightIconName && (
+                <View style={styles.topRightIconContainer}>
+                    <MaterialCommunityIcons name={topRightIconName} size={20} color={iconColor} />
+                </View>
+            )}
 
-            { error && <ErrorDialog iconColor='black' textColor='black' iconName='wifi-off' error={error} onClose={() => setError('')} /> }
-
-
-            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-                <Banner />
-            </View>
-
-        </View>
+        </TouchableOpacity>
     );
 };
 
-// define your styles
+export default HomeCard;
+
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: height / 5,
+        width: width / 2.3,
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        elevation: 3,
+       
+    },
+    iconContainer: {
+        position: 'absolute',
+        top: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 5,
+        padding: 5,
+       
+    },
+    textContainer: {
+        position: 'absolute',
+        bottom: 20,
+        borderRadius: 20,
+        height: height / 24,
+        width: width / 3,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text: {
+        fontSize: 22,
+        color: '#000',
+        fontWeight:'bold'
+        
+    },
+    topRightIconContainer: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
-
-export default Home;
