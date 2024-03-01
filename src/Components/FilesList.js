@@ -2,14 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions } from 'react-native';
 import SearchBar from "react-native-dynamic-search-bar";
 import AnimatedIcon from './AnimatedIcon';
-
+// import icns
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const height = Dimensions.get('window').height;
 
 export const ListEmptyComponent = () => {
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
-            <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}>No files found.</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: '50%' }}>
+            <MaterialCommunityIcons color={'#dedcdc'} name='file-search' size={100} />
+            <Text style={{ color: '#9c9a9a', fontWeight: 'bold', fontSize: 20 }}>No files found.</Text>
         </View>
     )
 }
@@ -37,10 +39,14 @@ export const RefreshControlComponent = ({ refreshing, onRefresh }) => {
 
 
 export const CustomSearchBarView = ({ onChangeText, onClearPress, search, viewStyle, searchBarStyle }) => {
+
+    console.log('====================================');
+    console.log(viewStyle, searchBarStyle);
+    console.log('====================================');
     return (
         <Animated.View
             style={{
-                width: '90%',
+                width: '100%',
                 marginTop: 10,
                 paddingBottom: 10,
                 marginBottom: 10,
@@ -51,7 +57,6 @@ export const CustomSearchBarView = ({ onChangeText, onClearPress, search, viewSt
         >
             <SearchBar
                 style={{
-                    width: '90%',
                     marginTop: 10,
                     borderRadius: 50,
                     ...searchBarStyle

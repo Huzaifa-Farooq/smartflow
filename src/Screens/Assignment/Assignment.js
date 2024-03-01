@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
         color: 'black'
     },
     button: {
-        backgroundColor: '#ebeda8',
+        backgroundColor: 'skyblue',
         width: '50%',
         padding: 20,
         alignSelf: 'center',
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
         bottom: 0, top: '100%'
     },
     button1: {
-        backgroundColor: '#deb018',
+        backgroundColor: 'lightblue',
         width: '50%',
         padding: 20,
         alignSelf: 'center',

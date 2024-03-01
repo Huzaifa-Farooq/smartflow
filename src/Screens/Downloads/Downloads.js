@@ -8,7 +8,6 @@ import Banner from '../../Components/BannersAd/Banner';
 
 import { DocumentItem } from '../../Components/DocumentItem';
 import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../../utils/utils.mjs';
-import SearchBar from "react-native-dynamic-search-bar";
 import { ListEmptyComponent, CustomSearchBarView, ListFooterComponent, FileLoadingComponent } from '../../Components/FilesList';
 import { animatedFilesListViewStyle } from '../../styles/styles';
 

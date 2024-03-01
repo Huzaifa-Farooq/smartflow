@@ -2,7 +2,6 @@ import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from '../Screens/Home/Home';
 import Notes from '../Screens/Notes/Notes';
-import Presentation from '../Screens/Presentation/Presentation';
 import Assignment from '../Screens/Assignment/Assignment';
 import { NavigationContainer } from '@react-navigation/native';
 import DrawerNavigation from './DrawerNavigation';
@@ -10,6 +9,9 @@ import FeedBack from '../Screens/FeedBack/FeedBack';
 import SplashScreen from '../Screens/SplashScreen/SplashScreen';
 import Downloads from '../Screens/Downloads/Downloads';
 import PDFMerge from '../Screens/PDFMerge/PDFMerge';
+import Scanner from '../Screens/Scanner/Scanner';
+import FiltersOptionComponent from '../Screens/Scanner/FiltersOptionComponent';
+import ApplyingFiltersComponent from '../Screens/Scanner/ApplyingFiltersComponent';
 
 
 const Stack = createNativeStackNavigator();
@@ -18,14 +20,14 @@ export default class StackNavigation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showSplash: true, // show splash screen
+      showSplash: false, // show splash screen
     };
   }
 
   componentDidMount() {
     setTimeout(() => {
       this.setState({ showSplash: false });
-    }, 1800);
+    }, 2000);
   }
 
 
@@ -41,7 +43,11 @@ export default class StackNavigation extends React.Component {
               />
               <Stack.Screen name='Notes' component={Notes} options={{ headerShown: false }}
               />
-              <Stack.Screen name='Presentations' component={Presentation} options={{ headerShown: false }}
+              <Stack.Screen name='Scanner' component={Scanner} options={{ headerShown: false }}
+              />
+              <Stack.Screen name='FilterSelectOption' component={FiltersOptionComponent} options={{ headerShown: false }}
+              />
+              <Stack.Screen name='ApplyFilters' component={ApplyingFiltersComponent} options={{ headerShown: false }}
               />
               <Stack.Screen name='Downloads' component={Downloads} options={{ headerShown: false }}
               />

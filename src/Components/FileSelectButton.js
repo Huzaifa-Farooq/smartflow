@@ -44,12 +44,22 @@ export default FileSelectButton = ({ onFileSelect, allowedTypes, allowMultiSelec
     };
 
     return (
+        <FloatingButton
+            onPress={handlePress}
+            iconName={'file'}
+        />
+    )
+};
+
+
+export const FloatingButton = ({ onPress, iconName }) => {
+    return (
         <TouchableOpacity
             style={styles.floatingButton}
-            onPress={handlePress}
+            onPress={onPress}
         >
             <View style={styles.iconView}>
-                <MaterialCommunityIcons name="file" size={30} color="white" />
+                <MaterialCommunityIcons name={iconName} size={30} color="white" />
             </View>
         </TouchableOpacity>
     )

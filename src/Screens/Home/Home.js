@@ -124,17 +124,15 @@ const Home = ({ navigation }) => {
                     onPress={() => navigation.navigate("FeedBack")}
                 /> */}
 
-
-                <HomeCard txt={'Presentations'}
-                    iconName='book-check-outline'
+                <HomeCard txt={'Scanner'}
+                    iconName='camera-document'
                     iconColor={'#2A3BE2'}
                     iconBackgroundColor={"#CDCEE0"}
-                    onPress={() => handleNavigation("Presentations")}
-                    topRightIconName={isConnected ? null : 'wifi-off'}
+                    onPress={() => navigation.navigate("Scanner")}
                 />
             </View>
             <View >
-                <HomeCardTwo txt={'Downloads'}
+                <HomeCardTwo txt={'My Files'}
                     iconName='download'
                     iconColor={'#E28C20'}
                     iconBackgroundColor={"#ebeda8"}

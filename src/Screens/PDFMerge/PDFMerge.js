@@ -41,19 +41,26 @@ const PDFMerge = ({ navigation }) => {
 
     const translateY = diffClamp.interpolate({
         inputRange: [0, 100],
-        outputRange: [0, -60],
+        outputRange: [0, -20],
         extrapolate: 'clamp',
     });
 
     const opacity = diffClamp.interpolate({
-        inputRange: [0, 100],
+        inputRange: [0, 50],
         outputRange: [1, 0],
         extrapolate: 'clamp',
     });
 
     const marginTop = diffClamp.interpolate({
         inputRange: [0, 100],
-        outputRange: [0, -30],
+        outputRange: [0, -35],
+        extrapolate: 'clamp',
+    });
+
+    // reducing height from 0 to 30 and 30 to 0
+    const height = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [30, 0],
         extrapolate: 'clamp',
     });
 
@@ -64,6 +71,8 @@ const PDFMerge = ({ navigation }) => {
 
     const folderReader = async () => {
         setLoading(true);
+        scrollY.setValue(0);
+
         const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
         const result = await loadFiles({ directoryPath: directory, required_ext: ['.pdf'] });
         setresult(sortFilesArray({
@@ -147,6 +156,12 @@ const PDFMerge = ({ navigation }) => {
                 icon={"keyboard-backspace"}
                 onPress={() => navigation.goBack()}
             />
+
+            {
+                loading && <FileLoadingComponent />
+            }
+
+
             <CustomSearchBarView
                 onChangeText={(text) => setSearch(text)}
                 onClearPress={() => setSearch('')}
@@ -155,19 +170,15 @@ const PDFMerge = ({ navigation }) => {
                 searchBarStyle={{ opacity: opacity }}
             />
 
-            {
-                loading && <FileLoadingComponent />
-            }
-
             <View
                 style={animatedFilesListViewStyle}
             >
-                <Animated.FlatList 
+                <Animated.FlatList
                     style={{ marginTop }}
                     refreshControl={
                         <RefreshControl
                             tintColor="#deb018"
-                            onRefresh={() => {folderReader()}}
+                            onRefresh={() => { folderReader() }}
                             refreshing={false}
                         />
                     }
@@ -191,6 +202,8 @@ const PDFMerge = ({ navigation }) => {
                     )
                 }
             </View>
+
+
 
             {
                 error && (

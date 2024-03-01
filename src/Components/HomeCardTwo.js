@@ -50,9 +50,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     text: {
-        fontSize: 22,
+        fontSize: 20,
         color: '#000',
-        fontWeight:'bold',
-      
+        // fontWeight:'bold',
+        fontFamily: 'ProximaNova-Regular',
     },
 });
