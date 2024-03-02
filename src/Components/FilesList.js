@@ -106,7 +106,7 @@ export default FilesListComponent = ({
     navigation,
     directory,
     onFileClick,
-    renderCustomListItem,
+    renderItem,
     listFooterHeight = 20,
     required_ext = ['*']
 }) => {
@@ -177,26 +177,22 @@ export default FilesListComponent = ({
             .catch((error) => console.error(error));
     }
 
-    if (!renderCustomListItem) {
-        renderCustomListItem = ({ item }) => (
-            <DocumentItem
-                iconSrc={getFileIcon(item.name)}
-                title={item.name}
-                size={formatSize(item.size)}
-            />
-        )
-    }
-
-    const renderListItem = ({ item, index }) => {
-        return (
-            <TouchableHighlight
-                underlayColor={''}
-                onPress={() => { onFileClick(item.path) }}
-                onLongPress={() => handleLongPress(item.path, onDelete)}
-            >
-                {renderCustomListItem({ item, index })}
-            </TouchableHighlight>
-        )
+    if (!renderItem) {
+        renderItem = ({ item, index }) => {
+            return (
+                <TouchableHighlight
+                    underlayColor={''}
+                    onPress={() => { onFileClick(item.path) }}
+                    onLongPress={() => handleLongPress(item.path, onDelete)}
+                >
+                    <DocumentItem
+                        iconSrc={getFileIcon(item.name)}
+                        title={item.name}
+                        size={formatSize(item.size)}
+                    />
+                </TouchableHighlight>
+            )
+        }
     }
 
     const files = search ? searchFilesArray({ files: result, query: search }) : result;
@@ -237,7 +233,7 @@ export default FilesListComponent = ({
                     }}
                     ListEmptyComponent={<ListEmptyComponent />}
                     ListFooterComponent={<ListFooterComponent height={listFooterHeight} />}
-                    renderItem={renderListItem}
+                    renderItem={({ item, index }) => renderItem({ item, index, onLongPress: () => handleLongPress(item.path, onDelete)})}
                 />
             </View>
         </>

@@ -15,10 +15,7 @@ export default ErrorDialog = ({
     textColor = '#ff0000',
 }) => {
     // stringify error
-    console.log('====================================');
     console.log('ErrorDialog', error);
-    console.log('====================================');
-
 
     return (
         <Modal

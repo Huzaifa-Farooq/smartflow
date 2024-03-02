@@ -47,7 +47,7 @@ const PDFMerge = ({ navigation }) => {
         setSelectedFiles([]);
         setMergeInProgress(true);
 
-        const defaultFilename = 'merged-' + new Date() + '.pdf';
+        const defaultFilename = 'Merged-' + Date.now() + '.pdf';
         const filePath = RNFS.DownloadDirectoryPath + '/SmartFlow/' + defaultFilename;
 
         pdfMerge({
@@ -58,7 +58,7 @@ const PDFMerge = ({ navigation }) => {
                 setCompleted(true);
                 setTimeout(() => {
                     navigation.navigate('Downloads');
-                    FileViewer.open(filePath);
+                    FileViewer.open(filePath, { showOpenWithDialog: true });
                     setCompleted(false);
                     setMergeInProgress(false);
                 }, 3000);
@@ -75,17 +75,23 @@ const PDFMerge = ({ navigation }) => {
         });
     }
 
-    const renderCustomListItem = ({ item }) => {
+    const renderItem = ({ item, index, onLongPress }) => {
         const isSelected = selectedFiles.indexOf(item.path) !== -1;
         const selectedOrder = selectedFiles.indexOf(item.path) + 1;
         return (
-            <DocumentItem
-                iconSrc={getFileIcon(item.name)}
-                title={item.name}
-                size={formatSize(item.size)}
-                selected={isSelected}
-                selectedNumber={selectedOrder}
-            />
+            <TouchableHighlight
+                underlayColor={''}
+                onPress={() => { updateSelectedFiles(item) }}
+                onLongPress={onLongPress}
+            >
+                <DocumentItem
+                    iconSrc={getFileIcon(item.name)}
+                    title={item.name}
+                    size={formatSize(item.size)}
+                    selected={isSelected}
+                    selectedNumber={selectedOrder}
+                />
+            </TouchableHighlight>
         )
     }
 
@@ -100,7 +106,7 @@ const PDFMerge = ({ navigation }) => {
             <FilesListComponent
                 navigation={navigation}
                 directory={RNFS.DownloadDirectoryPath + '/SmartFlow'}
-                renderCustomListItem={renderCustomListItem}
+                renderItem={renderItem}
                 required_ext={['.pdf']}
                 listFooterHeight={selectedFiles.length > 0 ? 70 : 10}
             />
