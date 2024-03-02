@@ -33,6 +33,7 @@ export const createImagesPDF = async ({
             return
         }
 
+
         page.drawImage(pdfImage, {
             x: 0,
             y: 0,

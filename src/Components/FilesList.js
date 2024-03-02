@@ -1,11 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions } from 'react-native';
+import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions, Alert } from 'react-native';
 import SearchBar from "react-native-dynamic-search-bar";
 import AnimatedIcon from './AnimatedIcon';
-// import icns
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import RNFetchBlob from 'rn-fetch-blob';
+import Share from 'react-native-share';
+
+
+import { StyleSheet, } from 'react-native';
+import { CustomHeader } from './CustomHeader';
+import RNFS from 'react-native-fs'
+import FileViewer from "react-native-file-viewer";
+import { DocumentItem } from './DocumentItem';
+import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../utils/utils.mjs';
+import { animatedFilesListViewStyle } from '../styles/styles';
+
 
 const height = Dimensions.get('window').height;
+
 
 export const ListEmptyComponent = () => {
     return (
@@ -25,9 +37,6 @@ export const ListFooterComponent = ({ height }) => {
 
 
 export const RefreshControlComponent = ({ refreshing, onRefresh }) => {
-    console.log('====================================');
-    console.log('refreshing', refreshing);
-    console.log('====================================');
     return (
         <RefreshControl
             refreshing={refreshing}
@@ -39,10 +48,6 @@ export const RefreshControlComponent = ({ refreshing, onRefresh }) => {
 
 
 export const CustomSearchBarView = ({ onChangeText, onClearPress, search, viewStyle, searchBarStyle }) => {
-
-    console.log('====================================');
-    console.log(viewStyle, searchBarStyle);
-    console.log('====================================');
     return (
         <Animated.View
             style={{
@@ -93,4 +98,242 @@ export const FileLoadingComponent = () => {
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Loading...</Text>
         </View>
     )
+};
+
+
+
+export default FilesListComponent = ({
+    navigation,
+    directory,
+    onFileClick,
+    renderCustomListItem,
+    listFooterHeight = 20,
+    required_ext = ['*']
+}) => {
+    const [result, setResult] = useState([]);
+    const [search, setSearch] = useState('');
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
+
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const diffClamp = Animated.diffClamp(scrollY, 0, 100);
+
+    const translateY = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [0, -60],
+        extrapolate: 'clamp',
+    });
+
+    const opacity = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+    });
+
+    const marginTop = diffClamp.interpolate({
+        inputRange: [0, 100],
+        outputRange: [0, -30],
+        extrapolate: 'clamp',
+    });
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setInitialLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+
+    useEffect(() => {
+        folderReader();
+    }, [])
+
+    const folderReader = async () => {
+        setLoading(true);
+        const result = await loadFiles({
+            directoryPath: directory,
+            required_ext: required_ext
+        });
+        setResult(sortFilesArray({
+            files: result,
+            sortBy: 'date',
+            reversed: true
+        }));
+        setLoading(false);
+    };
+
+    if (!onFileClick) {
+        onFileClick = (path) => {
+            FileViewer.open(path, { showOpenWithDialog: true })
+        }
+    }
+
+    const onDelete = (filePath) => {
+        RNFetchBlob.fs.unlink(filePath)
+            .then(() => {
+                setResult(result.filter((file) => file.path !== filePath));
+            })
+            .catch((error) => console.error(error));
+    }
+
+    if (!renderCustomListItem) {
+        renderCustomListItem = ({ item }) => (
+            <DocumentItem
+                iconSrc={getFileIcon(item.name)}
+                title={item.name}
+                size={formatSize(item.size)}
+            />
+        )
+    }
+
+    const renderListItem = ({ item, index }) => {
+        return (
+            <TouchableHighlight
+                underlayColor={''}
+                onPress={() => { onFileClick(item.path) }}
+                onLongPress={() => handleLongPress(item.path, onDelete)}
+            >
+                {renderCustomListItem({ item, index })}
+            </TouchableHighlight>
+        )
+    }
+
+    const files = search ? searchFilesArray({ files: result, query: search }) : result;
+
+
+    if (initialLoading) {
+        return (
+            <FileLoadingComponent />
+        )
+    }
+
+    return (
+        <>
+            <CustomSearchBarView
+                onChangeText={(text) => setSearch(text)}
+                onClearPress={() => setSearch('')}
+                search={search}
+                viewStyle={{ transform: [{ translateY }] }}
+                searchBarStyle={{ opacity: opacity }}
+            />
+            {loading && <FileLoadingComponent />}
+
+            <View style={animatedFilesListViewStyle}>
+                <Animated.FlatList
+                    style={{ marginTop }}
+                    refreshControl={
+                        <RefreshControl
+                            tintColor="#deb018"
+                            onRefresh={() => { folderReader() }}
+                            refreshing={false}
+                        />
+                    }
+                    bounces={true}
+                    data={files}
+                    onScroll={(e) => {
+                        if (e.nativeEvent.contentOffset.y > 0)
+                            scrollY.setValue(e.nativeEvent.contentOffset.y);
+                    }}
+                    ListEmptyComponent={<ListEmptyComponent />}
+                    ListFooterComponent={<ListFooterComponent height={listFooterHeight} />}
+                    renderItem={renderListItem}
+                />
+            </View>
+        </>
+    );
+};
+
+
+const onShare = async (filePath) => {
+    const options = {
+        title: 'Share',
+        message: 'Sent via Smartflow',
+        url: 'file://' + filePath,
+    };
+    try {
+        const result = await Share.open(options);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const deleteFile = (filePath, onDelete) => {
+    Alert.alert(
+        "Delete File",
+        "Are you sure you want to delete this file?",
+        [
+            {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+            },
+            {
+                text: "Delete",
+                onPress: () => { onDelete(filePath) }
+            }
+        ]
+    )
 }
+
+export const handleLongPress = (filePath, onDelete) => {
+    Alert.alert(
+        "File Options",
+        "Choose an option",
+        [
+            {
+                text: "Share",
+                onPress: () => { onShare(filePath) }
+            },
+            {
+                text: "Delete",
+                onPress: () => { deleteFile(filePath, onDelete) }
+            },
+            {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+                style: "cancel"
+            }
+        ]
+    );
+}
+
+
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    floatingButton: {
+        position: 'absolute',
+        bottom: 30,
+        right: 20,
+        backgroundColor: '#00B0F0',
+        width: 130,
+        height: 60,
+        borderRadius: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+    },
+    text: {
+        fontSize: 16,
+        color: '#000',
+        fontWeight: 'bold'
+    },
+    iconView: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '50%',
+        justifyContent: 'space-around',
+        marginHorizontal: 10,
+        marginVertical: 2
+
+    },
+    RBText: {
+        fontSize: 26,
+        color: '#000',
+        fontWeight: 'bold'
+
+    }
+});
+

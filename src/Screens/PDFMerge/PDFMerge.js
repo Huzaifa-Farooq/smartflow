@@ -1,7 +1,7 @@
 //import libraries
 import CustomHeader from '../../Components/CustomHeader';
 import {
-    StyleSheet, Text, View, FlatList, Animated, TouchableHighlight, Dimensions, ScrollView,
+    StyleSheet, Text, View, Animated, TouchableHighlight, Dimensions, ScrollView,
     RefreshControl
 } from 'react-native';
 import { React, useState, useEffect, useRef } from 'react';
@@ -10,7 +10,7 @@ import FileViewer from "react-native-file-viewer";
 import Banner from '../../Components/BannersAd/Banner';
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize } from '../../utils/utils.mjs';
 import { pdfMerge } from '../../utils/pdfMerge';
 
 import ErrorDialog from '../../Components/ErrorDialog';
@@ -18,70 +18,18 @@ import PDFMergerProgressModal from '../../Components/PDFMergerProgressModal';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
-import { animatedFilesListViewStyle } from '../../styles/styles';
-
-import { ListEmptyComponent, FileLoadingComponent, ListFooterComponent, CustomSearchBarView } from '../../Components/FilesList';
+import FilesListComponent, { handleLongPress } from '../../Components/FilesList';
 
 
 // create a component
 const PDFMerge = ({ navigation }) => {
-    const [result, setresult] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState([]);
-    const [search, setSearch] = useState('');
     const [error, setError] = useState('');
     const [completed, setCompleted] = useState(false);
     const [mergeInProgress, setMergeInProgress] = useState(false);
     const [progressMessage, setProgressMessage] = useState('');
-    const [loading, setLoading] = useState(true);
-
-    const scrollY = useRef(new Animated.Value(0)).current;
-    const diffClamp = Animated.diffClamp(scrollY, 0, 100);
 
     const MAX_FILES = 5;
-
-    const translateY = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -20],
-        extrapolate: 'clamp',
-    });
-
-    const opacity = diffClamp.interpolate({
-        inputRange: [0, 50],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-    });
-
-    const marginTop = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -35],
-        extrapolate: 'clamp',
-    });
-
-    // reducing height from 0 to 30 and 30 to 0
-    const height = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [30, 0],
-        extrapolate: 'clamp',
-    });
-
-
-    useEffect(() => {
-        folderReader();
-    }, [])
-
-    const folderReader = async () => {
-        setLoading(true);
-        scrollY.setValue(0);
-
-        const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
-        const result = await loadFiles({ directoryPath: directory, required_ext: ['.pdf'] });
-        setresult(sortFilesArray({
-            files: result,
-            sortBy: 'date',
-            reversed: true
-        }));
-        setLoading(false);
-    };
 
     const updateSelectedFiles = (file) => {
         console.log('file', file);
@@ -99,9 +47,7 @@ const PDFMerge = ({ navigation }) => {
         setSelectedFiles([]);
         setMergeInProgress(true);
 
-        // merged-datetime in DD-MM-YYYY HH-MM-SS format
-        const datetime = new Date().toLocaleString().replace(/:/g, '-').replace(/\//g, '-').replace(/,/g, '');
-        const defaultFilename = 'merged-' + datetime + '.pdf';
+        const defaultFilename = 'merged-' + new Date() + '.pdf';
         const filePath = RNFS.DownloadDirectoryPath + '/SmartFlow/' + defaultFilename;
 
         pdfMerge({
@@ -129,23 +75,17 @@ const PDFMerge = ({ navigation }) => {
         });
     }
 
-    const files = search ? searchFilesArray({ files: result, query: search }) : result;
-
-    const renderListItem = ({ item, index }) => {
+    const renderCustomListItem = ({ item }) => {
         const isSelected = selectedFiles.indexOf(item.path) !== -1;
         const selectedOrder = selectedFiles.indexOf(item.path) + 1;
         return (
-            <TouchableHighlight
-                underlayColor={''}
-                onPress={() => updateSelectedFiles(item)}>
-                <DocumentItem
-                    iconSrc={getFileIcon(item.name)}
-                    title={item.name}
-                    size={formatSize(item.size)}
-                    selected={isSelected}
-                    selectedNumber={selectedOrder}
-                />
-            </TouchableHighlight>
+            <DocumentItem
+                iconSrc={getFileIcon(item.name)}
+                title={item.name}
+                size={formatSize(item.size)}
+                selected={isSelected}
+                selectedNumber={selectedOrder}
+            />
         )
     }
 
@@ -157,53 +97,22 @@ const PDFMerge = ({ navigation }) => {
                 onPress={() => navigation.goBack()}
             />
 
-            {
-                loading && <FileLoadingComponent />
-            }
-
-
-            <CustomSearchBarView
-                onChangeText={(text) => setSearch(text)}
-                onClearPress={() => setSearch('')}
-                search={search}
-                viewStyle={{ transform: [{ translateY }] }}
-                searchBarStyle={{ opacity: opacity }}
+            <FilesListComponent
+                navigation={navigation}
+                directory={RNFS.DownloadDirectoryPath + '/SmartFlow'}
+                renderCustomListItem={renderCustomListItem}
+                required_ext={['.pdf']}
+                listFooterHeight={selectedFiles.length > 0 ? 70 : 10}
             />
 
-            <View
-                style={animatedFilesListViewStyle}
-            >
-                <Animated.FlatList
-                    style={{ marginTop }}
-                    refreshControl={
-                        <RefreshControl
-                            tintColor="#deb018"
-                            onRefresh={() => { folderReader() }}
-                            refreshing={false}
-                        />
-                    }
-                    bounces={true}
-                    data={files}
-                    onScroll={(e) => {
-                        if (e.nativeEvent.contentOffset.y > 0)
-                            scrollY.setValue(e.nativeEvent.contentOffset.y);
-                    }}
-                    ListEmptyComponent={loading ? null : <ListEmptyComponent />}
-                    ListFooterComponent={<ListFooterComponent height={selectedFiles.length > 0 ? 50 : 10} />}
-                    renderItem={renderListItem}
-                />
-
-                {
-                    selectedFiles.length > 1 && (
-                        <BottomDockedPanel
-                            onCancelPress={() => setSelectedFiles([])}
-                            onMergePress={() => mergePDFS()}
-                        />
-                    )
-                }
-            </View>
-
-
+            {
+                selectedFiles.length > 1 && (
+                    <BottomDockedPanel
+                        onCancelPress={() => setSelectedFiles([])}
+                        onMergePress={() => mergePDFS()}
+                    />
+                )
+            }
 
             {
                 error && (

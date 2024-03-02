@@ -29,6 +29,11 @@ const FileNameInputTag = ({ txt, onChangeText }) => {
             editable={true}
             style={{
                 fontSize: 18,
+                fontWeight: 'bold',
+                borderBottomWidth: txt ? 1 : null,
+                borderStyle: txt ? 'dotted' : null,
+                margin: 0,
+                padding: 0,
             }}
         />
     )
@@ -63,6 +68,13 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
             }
 
             const outputFilePath = SCANNER_DOCUMENT_PATH + '/' + fileName + '.pdf';
+
+            // printing size of each file im MBs
+            images.forEach((image) => {
+                RNFS.stat(image).then((stats) => {
+                    console.log('File size: ' + stats.size / (1024 * 1024) + ' MB');
+                });
+            });
 
             createImagesPDF({
                 images: images,
