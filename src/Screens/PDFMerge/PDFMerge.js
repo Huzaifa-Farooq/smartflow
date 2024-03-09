@@ -105,7 +105,7 @@ const PDFMerge = ({ navigation }) => {
 
             <FilesListComponent
                 navigation={navigation}
-                directory={RNFS.DownloadDirectoryPath + '/SmartFlow'}
+                directories={[RNFS.DownloadDirectoryPath + '/SmartFlow', RNFS.DocumentDirectoryPath]}
                 renderItem={renderItem}
                 required_ext={['.pdf']}
                 listFooterHeight={selectedFiles.length > 0 ? 70 : 10}

@@ -6,13 +6,16 @@ import AnimatedIcon from "./AnimatedIcon";
 const NotesProgressModal = ({ uploadProgress, uploadInProgress, notesGenerationInProgress, fileDownloadInProgress, downloadProgress }) => {
     let iconName = '';
     let text = '';
+    let progress = null;
     if (uploadInProgress) {
         iconName = 'fileUpload';
-        text = 'Uploading file...\n' + uploadProgress.toFixed(2) + '%';
+        text = 'Uploading file...';
+        progress = uploadProgress.toFixed(2) + '%';
     }
     else if (fileDownloadInProgress) {
         iconName = 'fileDownload';
-        text = 'Downloading file...\n' + downloadProgress.toFixed(2) + '%';
+        text = 'Downloading file...';
+        progress = downloadProgress.toFixed(2) + '%';
     }
     else if (notesGenerationInProgress) {
         iconName = 'writeOnPage';
@@ -34,6 +37,7 @@ const NotesProgressModal = ({ uploadProgress, uploadInProgress, notesGenerationI
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <AnimatedIcon name={iconName} style={{ width: 100, height: 100 }} />
                         <Text style={{ fontSize: 14, fontWeight: 'bold', color: 'black' }}>{text}</Text>
+                        {progress && <Text style={{ fontSize: 14, fontWeight: 'bold', color: 'black' }} >{progress}</Text>}
                     </View>
                 </View>
             </View>

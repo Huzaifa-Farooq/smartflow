@@ -21,7 +21,7 @@ export default ProgressModal = ({ progress, text }) => {
                             borderWidth={2}
                             showsText={true}
                         />
-                        <Text>{text}</Text>
+                        <Text style={{ color: 'black' }} >{text}</Text>
                     </View>
                 </View>
             </View>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions, Alert } from 'react-native';
 import SearchBar from "react-native-dynamic-search-bar";
 import AnimatedIcon from './AnimatedIcon';
@@ -104,7 +104,7 @@ export const FileLoadingComponent = () => {
 
 export default FilesListComponent = ({
     navigation,
-    directory,
+    directories,
     onFileClick,
     renderItem,
     listFooterHeight = 20,
@@ -151,12 +151,17 @@ export default FilesListComponent = ({
 
     const folderReader = async () => {
         setLoading(true);
-        const result = await loadFiles({
-            directoryPath: directory,
-            required_ext: required_ext
-        });
+        const results = await Promise.all(directories.map(async directory => {
+            console.log('====================================');
+            console.log('Reading directory: ', directory);
+            console.log('====================================');
+            return await loadFiles({
+                directoryPath: directory,
+                required_ext: required_ext
+            });
+        }));
         setResult(sortFilesArray({
-            files: result,
+            files: results.flat(),
             sortBy: 'date',
             reversed: true
         }));
@@ -195,7 +200,10 @@ export default FilesListComponent = ({
         }
     }
 
-    const files = search ? searchFilesArray({ files: result, query: search }) : result;
+
+    const files = useMemo(() => {
+        return search ? searchFilesArray({ files: result, query: search }) : result;
+    }, [search, result]);
 
 
     if (initialLoading) {

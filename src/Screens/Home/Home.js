@@ -1,6 +1,6 @@
 //import liraries
 import React from 'react';
-import { View, Text, StyleSheet, StatusBar, PermissionsAndroid } from 'react-native';
+import { View, RefreshControl, StyleSheet, StatusBar, PermissionsAndroid, ScrollView } from 'react-native';
 import CustomHeader from '../../Components/CustomHeader';
 import HomeCard from '../../Components/HomeCard';
 import HomeCardTwo from '../../Components/HomeCardTwo';
@@ -10,12 +10,15 @@ import { useEffect, useState } from 'react';
 import RNFS from 'react-native-fs';
 
 import ErrorDialog from '../../Components/ErrorDialog';
-import NetInfo from '@react-native-community/netinfo';
+import { checkServerConnection } from '../../api/api.mjs';
 
+
+const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
 const Home = ({ navigation }) => {
-    const [isConnected, setIsConnected] = useState(false);
+    const [isConnected, setIsConnected] = useState(true);
     const [error, setError] = useState('');
+
 
     const handleToggle = () => {
         navigation.openDrawer();
@@ -23,7 +26,8 @@ const Home = ({ navigation }) => {
 
     useEffect(() => {
         requestPermission();
-        networkchecker();
+        RNFS.mkdir(SCANNER_DOCUMENT_PATH);
+        checkServerConnection((val) => { setIsConnected(val) })
     }, []);
 
     const requestPermission = async () => {
@@ -52,15 +56,6 @@ const Home = ({ navigation }) => {
         }
     };
 
-    const networkchecker = () => {
-        const unsubscribe = NetInfo.addEventListener(state => {
-            setIsConnected(state.isConnected);
-            console.log("checking internet connection : " + state.isConnected);
-        });
-
-        return () => unsubscribe();
-    };
-
     const handleNavigation = (path) => {
         console.log('====================================');
         console.log(isConnected);
@@ -86,61 +81,65 @@ const Home = ({ navigation }) => {
         <View style={{ flex: 1 }}>
             <StatusBar backgroundColor="#deb018" barStyle="dark-content" />
             <CustomHeader title="SmartFlow" icon={"menu"} onPress={handleToggle} />
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                marginTop: 20
-            }}>
-                <HomeCard txt={'Notes'}
-                    iconName='book-open-page-variant-outline'
-                    iconColor={'#09C3B6'}
-                    iconBackgroundColor={"#bfe0dd"}
-                    onPress={() => handleNavigation("Notes")}
-                    topRightIconName={isConnected ? null : 'wifi-off'}
-                />
-                <HomeCard txt={'Assignments'}
-                    iconName='bookmark-multiple-outline'
-                    iconColor={'#0BDA0B'}
-                    iconBackgroundColor={"#c9f2ca"}
-                    onPress={() => handleNavigation("Assignments")}
-                    topRightIconName={isConnected ? null : 'wifi-off'}
-                />
-            </View>
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                marginTop: 20
-            }}>
-                <HomeCard txt={'PDFMerger'}
-                    iconName='file-document-multiple'
-                    iconColor={'#E60FB7'}
-                    iconBackgroundColor={"#E2D0DE"}
-                    onPress={() => { navigation.navigate("PDFMerge") }}
-                />
-                {/* <HomeCard txt={'FeedBack'}
-                    iconName='notebook-edit-outline'
-                    iconColor={'#2A3BE2'}
-                    iconBackgroundColor={"#CDCEE0"}
-                    onPress={() => navigation.navigate("FeedBack")}
-                /> */}
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                            tintColor="#deb018"
+                            onRefresh={() => { checkServerConnection((val) => { setIsConnected(val) })}}
+                            refreshing={false}
+                        />
+                }
+            >
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    marginTop: 20
+                }}>
+                    <HomeCard txt={'Notes'}
+                        iconName='book-open-page-variant-outline'
+                        iconColor={'#09C3B6'}
+                        iconBackgroundColor={"#bfe0dd"}
+                        onPress={() => handleNavigation("Notes")}
+                        topRightIconName={isConnected ? null : 'wifi-off'}
+                    />
+                    <HomeCard txt={'Assignments'}
+                        iconName='bookmark-multiple-outline'
+                        iconColor={'#0BDA0B'}
+                        iconBackgroundColor={"#c9f2ca"}
+                        onPress={() => handleNavigation("Assignments")}
+                        topRightIconName={isConnected ? null : 'wifi-off'}
+                    />
+                </View>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    marginTop: 20
+                }}>
+                    <HomeCard txt={'PDFMerger'}
+                        iconName='file-document-multiple'
+                        iconColor={'#E60FB7'}
+                        iconBackgroundColor={"#E2D0DE"}
+                        onPress={() => { navigation.navigate("PDFMerge") }}
+                    />
 
-                <HomeCard txt={'Scanner'}
-                    iconName='camera-document'
-                    iconColor={'#2A3BE2'}
-                    iconBackgroundColor={"#CDCEE0"}
-                    onPress={() => navigation.navigate("Scanner")}
-                />
-            </View>
-            <View >
-                <HomeCardTwo txt={'My Files'}
-                    iconName='download'
-                    iconColor={'#E28C20'}
-                    iconBackgroundColor={"#ebeda8"}
-                    onPress={() => navigation.navigate("Downloads")}
-                />
-            </View>
+                    <HomeCard txt={'Scanner'}
+                        iconName='camera-document'
+                        iconColor={'#2A3BE2'}
+                        iconBackgroundColor={"#CDCEE0"}
+                        onPress={() => navigation.navigate("Scanner")}
+                    />
+                </View>
+                <View >
+                    <HomeCardTwo txt={'My Files'}
+                        iconName='download'
+                        iconColor={'#E28C20'}
+                        iconBackgroundColor={"#ebeda8"}
+                        onPress={() => navigation.navigate("Downloads")}
+                    />
+                </View>
+            </ScrollView>
 
-            { error && <ErrorDialog iconColor='black' textColor='black' iconName='wifi-off' error={error} onClose={() => setError('')} /> }
+            {error && <ErrorDialog iconColor='black' textColor='black' iconName='wifi-off' error={error} onClose={() => setError('')} />}
 
 
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>

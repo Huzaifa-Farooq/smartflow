@@ -16,10 +16,6 @@ export default FileSelectButton = ({ onFileSelect, allowedTypes, allowMultiSelec
         allowedTypes = DocumentPicker.types.allFiles;
     }
 
-    console.log('====================================');
-    console.log('allowedTypes', allowedTypes);
-    console.log('====================================');
-
     const handlePress = async () => {
         try {
             const file = await DocumentPicker.pickSingle({

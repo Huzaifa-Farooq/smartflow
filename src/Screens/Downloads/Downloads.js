@@ -8,6 +8,8 @@ import Banner from '../../Components/BannersAd/Banner';
 import FilesListComponent from '../../Components/FilesList';
 
 
+const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
+
 
 const Downloads = ({ navigation }) => {
     return (
@@ -19,7 +21,7 @@ const Downloads = ({ navigation }) => {
             />
             <FilesListComponent
                 navigation={navigation}
-                directory={RNFS.DownloadDirectoryPath + '/SmartFlow'}
+                directories={[RNFS.DownloadDirectoryPath + '/SmartFlow', SCANNER_DOCUMENT_PATH]}
             />
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                 <Banner />

@@ -31,7 +31,7 @@ const Header = ({ navigation }) => {
 };
 
 
-const SCANNER_DOCUMENT_PATH = RNFS.ExternalDirectoryPath + '/SmartFlow/ScannerDocuments';
+const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
 
 export default Scanner = ({ router, navigation }) => {
@@ -66,7 +66,7 @@ export default Scanner = ({ router, navigation }) => {
       <Header navigation={navigation} />
       <FilesListComponent
         navigation={navigation}
-        directory={SCANNER_DOCUMENT_PATH}
+        directories={[SCANNER_DOCUMENT_PATH]}
       />
       <FloatingButton
         iconName={'camera'}

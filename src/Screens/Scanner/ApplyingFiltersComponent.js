@@ -15,7 +15,7 @@ const numColumns = 3;
 const itemSize = (screenWidth / numColumns) - 20;
 
 
-const SCANNER_DOCUMENT_PATH = RNFS.ExternalDirectoryPath + '/SmartFlow/ScannerDocuments';
+const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
 
 const FileNameInputTag = ({ txt, onChangeText }) => {
@@ -34,6 +34,7 @@ const FileNameInputTag = ({ txt, onChangeText }) => {
                 borderStyle: txt ? 'dotted' : null,
                 margin: 0,
                 padding: 0,
+                color: 'black',
             }}
         />
     )
@@ -82,7 +83,7 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
                 successCallback: (outputFilePath) => {
                     console.log('Created file');
                     setPdfInProgress(false);
-                    navigation.navigate('Scanner');
+                    navigation.navigate('Scanner', { refresh: true });
                     FileViewer.open(outputFilePath, { showOpenWithDialog: true });
                 },
                 errorCallback: (error) => {
@@ -158,9 +159,14 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
                     renderItem={renderItem}
                     contentContainerStyle={{ justifyContent: 'space-between' }}
                 />
-                <View>
-                    <Button title="Confirm" onPress={() => onUserAction(true)} />
-                    <Button title="Cancel" onPress={() => onUserAction(false)} />
+                <View style={{ 
+                    marginTop: 20, 
+                    marginBottom: 20,
+                    justifyContent: 'space-around',
+                    flexDirection: 'row', 
+                    }}>
+                    <Button style={styles.button} title="Cancel" onPress={() => onUserAction(false)} />
+                    <Button style={styles.button} title="Confirm" onPress={() => onUserAction(true)} />
                 </View>
             </View>
         </View>
@@ -195,4 +201,12 @@ const styles = StyleSheet.create({
         height: itemSize,
         borderRadius: 5,
     },
+    button: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#09C3B6',
+        borderRadius: 5,
+    }
 });

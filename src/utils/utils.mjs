@@ -105,5 +105,29 @@ const searchFilesArray = ({ files, query }) => {
 };
 
 
+export const getFileName = async (directory, fileName) => {
+    // determining filename.
+    /* 
+        1. if file already exists then add a number at its end that doesn't exists
+        2. if file doesn't exist then use the same name
+    */
+    const extension = fileName.split('.').pop();
+    fileName = fileName.replace('.' + extension, '');
+    let newFileName = fileName;
+    let i = 1;
+    while (i < 100) {
+        const fileExists = await RNFS.exists(`${directory}/${newFileName}.${extension}`)
+        if (fileExists){
+            console.log(`${directory}/${newFileName}.${extension} exists`);
+            newFileName = `${fileName}(${i})`;
+            i++;
+        } else {
+            break;
+        }
+    }
+    return newFileName + '.' + extension;
+}
+
+
 // exporting functions
 export { isPdf, formatSize, getFileIcon, loadFiles, sortFilesArray, reverseArray, searchFilesArray };

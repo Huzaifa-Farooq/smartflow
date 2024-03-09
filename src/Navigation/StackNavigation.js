@@ -20,14 +20,14 @@ export default class StackNavigation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showSplash: false, // show splash screen
+      showSplash: true, // show splash screen
     };
   }
 
   componentDidMount() {
     setTimeout(() => {
       this.setState({ showSplash: false });
-    }, 2000);
+    }, 2300);
   }
 
 

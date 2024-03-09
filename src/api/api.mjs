@@ -1,14 +1,12 @@
 import axios from 'axios';
-import FormData from 'form-data';
-import RNFetchBlob from 'rn-fetch-blob';
-import * as mime from 'mime'
-import { uploadFiles, DocumentDirectoryPath } from "react-native-fs";
+import * as mime from 'mime';
+import { uploadFiles } from "react-native-fs";
 
 
-axios.defaults.baseURL = 'http://172.0.5.191:8001/';
+axios.defaults.baseURL = 'http://192.168.43.92:8001';
 
 
-const generateAssignment = ({ title, successCallback, errorCallback }) => {
+export const generateAssignment = ({ title, successCallback, errorCallback }) => {
   axios.post(
     `/generate_assignment`,
     {},
@@ -22,12 +20,12 @@ const generateAssignment = ({ title, successCallback, errorCallback }) => {
       successCallback(response.data);
     })
     .catch((error) => {
-      errorCallback(error);
+      errorCallback('Error while generating assignment.');
     });
 }
 
 
-const generateNotes = async ({ filePath, fileName, actionCode, progress, successCallback, errorCallback }) => {
+export const generateNotes = async ({ filePath, fileName, actionCode, progress, successCallback, errorCallback }) => {
 
   const files = [
     {
@@ -41,7 +39,7 @@ const generateNotes = async ({ filePath, fileName, actionCode, progress, success
   try {
 
     uploadFiles({
-      toUrl: `${axios.defaults.baseURL}generate_notes?action_code=${actionCode}`,
+      toUrl: `${axios.defaults.baseURL}/generate_notes?action_code=${actionCode}`,
       files: files,
       method: "POST",
       headers: {
@@ -62,37 +60,37 @@ const generateNotes = async ({ filePath, fileName, actionCode, progress, success
         successCallback(JSON.parse(response.body));
       })
       .catch((error) => {
-        errorCallback(error);
+        console.log(error);
+        errorCallback("Error uploading file.");
       });
   }
   catch (error) {
-    errorCallback(error);
+    errorCallback('Error while generating notes.');
   }
 }
 
 
-// generateAssignment({
-//   title: 'Fingerprint',
-//   successCallback: (data) => {
-//     console.log(data);
-//   },
-//   errorCallback: (error) => {
-//     console.error(error);
-//   },
-// });
-
-// testing generateNotes
-// generateNotes({
-//   filePath: '/storage/emulated/0/Download/Lecture 02.pptx',
-//   actionCode: 1,
-//   successCallback: (data) => {
-//     console.log(data);
-//   },
-//   errorCallback: (error) => {
-//     console.error(error);
-//   },
-// });
+export const checkServerConnection = (onResponse) => {
+  console.log('====================================');
+  axios.get('').then((response) => {
+    console.log('Server is up and running');
+    onResponse(true);
+  }).catch((error) => {
+    console.log('Server is down: ' + error);
+    onResponse(false);
+  });
+  console.log('====================================');
 
 
+}
 
-export { generateAssignment, generateNotes };
+/*
+
+export AWS_ACCESS_KEY_ID="AKIAWVSHEECG3LXVT7HV"
+export AWS_SECRET_ACCESS_KEY="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"
+export AWS_BUCKET_NAME="xentechnexus"
+export AWS_FILES_ENDPOINT_URL="eu-north-1.amazonaws.com"
+export BARD_API_KEY="AIzaSyC3PG_W1l7nS6uot9FnsToqdA1Ec940j08"
+export OPENAI_API_KEY="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"
+
+*/

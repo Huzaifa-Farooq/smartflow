@@ -27,10 +27,6 @@ export default ErrorDialog = ({
             <TouchableWithoutFeedback onPress={onClose}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        {/* <Image
-                            style={styles.errorIcon}
-                            source={require('../assets/Images/error.png')}
-                        /> */}
                         <MaterialCommunityIcons
                             name={iconName}
                             color={iconColor}
@@ -97,12 +93,12 @@ const styles = StyleSheet.create({
         padding: 10,
         margin: 10,
         borderRadius: 5,
-        width: 100, // Adjust the width as needed
-        alignSelf: 'center', // Center the button
+        width: 100,
+        alignSelf: 'center', 
     },
     buttonText: {
         color: 'white',
         textAlign: 'center',
-        fontSize: 16, // Adjust the font size as needed
+        fontSize: 16,
     },
 });

@@ -161,7 +161,7 @@ const Assignment = ({ navigation }) => {
                 downloadedFile && downloadProgress == 100 && (
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <TouchableHighlight
-                            underlayColor={'white'}
+                            underlayColor={''}
                             onPress={() => Fileopener(downloadedFile.path)}
                         >
                             <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
@@ -181,11 +181,11 @@ const Assignment = ({ navigation }) => {
 
             <View style={{ flex: 1 }}>
                 <TouchableOpacity
-                    style={[buttonDisabled ? styles.button : styles.button1]}
+                    style={[buttonDisabled ? styles.button1 : styles.button]}
                     onPress={handleAssignmentInput}
                     disabled={topic === ''}
                 >
-                    <Text style={buttonDisabled ? styles.btnText1 : styles.btnText}>Generate</Text>
+                    <Text style={ styles.btnText }>Generate</Text>
                 </TouchableOpacity>
             </View>
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -237,11 +237,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
 
-    btnText1: {
-        color: '#fff',
-        fontSize: 22,
-        fontWeight: 'bold'
-    },
     textColor: {
         color: '#777777'
     }

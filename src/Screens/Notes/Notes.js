@@ -1,16 +1,17 @@
 //import liraries
 import {
-    StyleSheet, Text, View, FlatList, TouchableHighlight,
-    ActivityIndicator, RefreshControl, Animated
+    StyleSheet, Text, View, TouchableHighlight, TouchableWithoutFeedback,
+    ActivityIndicator, RefreshControl, Animated, Modal,
 } from 'react-native';
-import { React, useState, useEffect, useRef, useCallback } from 'react'
+import { React, useState, useEffect, useRef, useCallback, useMemo } from 'react';
+
 import RNFS from 'react-native-fs';
 import CustomHeader from '../../Components/CustomHeader';
 import Banner from '../../Components/BannersAd/Banner';
 import FileViewer from "react-native-file-viewer";
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize, sortFilesArray, searchFilesArray } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, sortFilesArray, searchFilesArray, getFileName } from '../../utils/utils.mjs';
 import NotesOptionModal from '../../Components/NotesOptionModal';
 import { generateNotes } from '../../api/api.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
@@ -20,8 +21,6 @@ import NotesProgressModal from '../../Components/NotesProgressModal';
 import { ListEmptyComponent, CustomSearchBarView, FileLoadingComponent } from '../../Components/FilesList';
 import { animatedFilesListViewStyle } from '../../styles/styles';
 
-
-// import { startBackgroundService } from '../../utils/background_tasks';
 
 
 // create a component
@@ -34,7 +33,7 @@ const Notes = ({ navigation }) => {
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
-    const [downloadedFile, setDownloadedFile] = useState(null);
+    const [downloadedFile, setDownloadedFile] = useState();
     const [search, setSearch] = useState('');
     const [initialLoading, setInitialLoading] = useState(true);
 
@@ -77,19 +76,14 @@ const Notes = ({ navigation }) => {
 
     const fetchPptFiles = async () => {
         setLoading(true);
+        // setPptFiles([]);
         const files = await listPptFiles();
         setPptFiles(files);
         setLoading(false);
     };
 
     const listPptFiles = useCallback(async (directoryPath = RNFS.ExternalStorageDirectoryPath) => {
-        console.log('====================================');
-        console.log(directoryPath);
-        console.log('====================================');
         const fileNames = await RNFS.readDir(directoryPath);
-        console.log('====================================');
-        console.log(fileNames);
-        console.log('====================================');
         const requiredFiles = [];
         const visitedDirectories = [];
         const directoriesToSkip = [
@@ -103,7 +97,10 @@ const Notes = ({ navigation }) => {
             if (file && file.isFile() && (file.name.endsWith('.ppt') || file.name.endsWith('.pptx'))) {
                 requiredFiles.push(file);
                 // Update state as soon as a file is found
-                setPptFiles((prevFiles) => [...prevFiles, file]);
+                // if file already exists in the state, then don't add it again
+                if (!pptFiles.some((f) => f.path === file.path)) {
+                    setPptFiles((prevFiles) => [...prevFiles, file]);
+                }
             } else if (file.isDirectory()) {
                 // checking if the directory is to be skipped
                 if (directoriesToSkip.some((dir) => file.path.toLowerCase().includes(dir))) {
@@ -154,7 +151,7 @@ const Notes = ({ navigation }) => {
                 console.log('error while generating notes');
                 console.error(JSON.stringify(error));
                 // printing error message to user
-                setError(error.message);
+                setError('Error while generating notes');
 
                 setDisplayModal(false);
                 setUploadProgress(0);
@@ -177,13 +174,15 @@ const Notes = ({ navigation }) => {
         }
         else {
             console.log('No file to download')
-            setError(response.message);
+            setError('No file to download');
         }
 
     }
 
-    const downloadFile = ({ fileUrl, fileName }) => {
-        const filePath = RNFS.DownloadDirectoryPath + '/SmartFlow/' + fileName;
+    const downloadFile = async ({ fileUrl, fileName }) => {
+        const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
+        fileName = await getFileName(directory, fileName);
+        const filePath = directory + "/" + fileName;
         console.log('Downloading file' + fileUrl + ' to ' + filePath);
 
         // random number from 1 - 10
@@ -204,7 +203,14 @@ const Notes = ({ navigation }) => {
             },
         })
             .promise.then((response) => {
+                console.log('====================================');
                 console.log('File downloaded!', response);
+                console.log({
+                    size: response.bytesWritten,
+                    name: fileName,
+                    path: filePath
+                });
+                console.log('====================================');
                 setDownloadProgress(100);
                 setDownloadedFile({
                     size: response.bytesWritten,
@@ -226,30 +232,28 @@ const Notes = ({ navigation }) => {
         )
     }
 
-    const files = search ? searchFilesArray({ files: pptFiles, query: search }) : pptFiles;
+    const files = useMemo(() => {
+        let f = search ? searchFilesArray({ files: pptFiles, query: search }) : pptFiles;
+        f = sortFilesArray({ files: f, mode: 'date', reversed: true });
+        return f;
+    }, [pptFiles, search]);
 
-    // if there are no files and loading is false, then there are no ppt files in the device
-    if (pptFiles.length === 0 && !loading) {
+
+    const Header = useMemo(() => {
         return (
-            <View style={styles.container}>
-                <CustomHeader title={'Notes'}
-                    icon={"keyboard-backspace"}
-                    onPress={() => navigation.goBack()}
-                />
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>No PPT files found</Text>
-                </View>
-            </View>
+            <CustomHeader title={'Notes'}
+                icon={"keyboard-backspace"}
+                onPress={() => navigation.goBack()}
+            />
         )
-    }
+    }, [navigation]);
+
+
     // if loading is true and no files are found, then show loading indicator
     if ((loading && files.length === 0) || initialLoading) {
         return (
             <View style={styles.container}>
-                <CustomHeader title={'Notes'}
-                    icon={"keyboard-backspace"}
-                    onPress={() => navigation.goBack()}
-                />
+                {Header}
                 <FileLoadingComponent />
             </View>
         )
@@ -259,10 +263,7 @@ const Notes = ({ navigation }) => {
     else {
         return (
             <View style={styles.container}>
-                <CustomHeader title={'Notes'}
-                    icon={"keyboard-backspace"}
-                    onPress={() => navigation.goBack()}
-                />
+                {Header}
                 <FileSelectButton
                     allowedTypes={[DocumentPicker.types.ppt, DocumentPicker.types.pptx]}
                     allowMultiSelection={false}
@@ -278,6 +279,7 @@ const Notes = ({ navigation }) => {
                 <View style={animatedFilesListViewStyle}>
                     <Animated.FlatList
                         style={{ marginTop }}
+                        ListEmptyComponent={<ListEmptyComponent />}
                         refreshControl={
                             <RefreshControl
                                 tintColor="#deb018"
@@ -290,9 +292,8 @@ const Notes = ({ navigation }) => {
                             if (e.nativeEvent.contentOffset.y > 0)
                                 scrollY.setValue(e.nativeEvent.contentOffset.y);
                         }}
-                        data={sortFilesArray({ files: files, mode: 'date', reversed: true })}
+                        data={files}
                         ListFooterComponent={<ListFooter loading={loading} files={files} />}
-                        ListEmptyComponent={<ListEmptyComponent />}
                         renderItem={renderListItem}
                     />
 
@@ -320,6 +321,16 @@ const Notes = ({ navigation }) => {
                     }
 
                     {
+                        downloadedFile && downloadProgress == 100 && (
+                            <NotesOutputComponent
+                                downloadedFile={downloadedFile}
+                                onPress={() => Fileopener(downloadedFile.path)}
+                                onClose={() => setDownloadedFile(null)}
+                            />
+                        )
+                    }
+
+                    {
                         (error) && (
                             <ErrorDialog
                                 onClose={() => setError(null)}
@@ -344,6 +355,48 @@ const ListFooter = ({ loading, files }) => {
                 <Text style={{ fontSize: 11, fontWeight: 'bold', color: 'black' }}>Loading...</Text>
             </View>
         )
+    )
+}
+
+
+const NotesOutputComponent = ({ downloadedFile, onPress, onClose }) => {
+    return (
+        <Modal
+            transparent={true}
+            visible={true}
+            onRequestClose={onClose}
+        >
+            <TouchableWithoutFeedback onPress={onClose}>
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }} >
+                <View
+                    style={{
+                        height: 150,
+                        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    }}
+                >
+                    <View style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        <TouchableHighlight
+                            underlayColor={''}
+                            onPress={onPress}
+                        >
+                            <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
+                        </TouchableHighlight>
+                    </View>
+                </View>
+            </View>
+
+            </TouchableWithoutFeedback>
+        </Modal>
+
     )
 }
 
