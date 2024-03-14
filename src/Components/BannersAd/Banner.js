@@ -6,7 +6,10 @@ const adUnitId = __DEV__ ? TestIds.ADAPTIVE_BANNER : 'ca-app-pub-591902559561404
 
 const Banner=() =>{
   return (
-    <View>
+    <View
+    // adding border
+    style={{ flex: 1, justifyContent: 'flex-end' }}
+    >
        <BannerAd
       unitId={adUnitId}
       size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}

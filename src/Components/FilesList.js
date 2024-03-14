@@ -108,6 +108,7 @@ export default FilesListComponent = ({
     onFileClick,
     renderItem,
     listFooterHeight = 20,
+    CustomListFooter,
     required_ext = ['*']
 }) => {
     const [result, setResult] = useState([]);
@@ -152,9 +153,6 @@ export default FilesListComponent = ({
     const folderReader = async () => {
         setLoading(true);
         const results = await Promise.all(directories.map(async directory => {
-            console.log('====================================');
-            console.log('Reading directory: ', directory);
-            console.log('====================================');
             return await loadFiles({
                 directoryPath: directory,
                 required_ext: required_ext
@@ -202,7 +200,9 @@ export default FilesListComponent = ({
 
 
     const files = useMemo(() => {
-        return search ? searchFilesArray({ files: result, query: search }) : result;
+        let f = search ? searchFilesArray({ files: result, query: search }) : result;
+        f = sortFilesArray({ files: f, mode: 'date', reversed: true });
+        return f;
     }, [search, result]);
 
 
@@ -240,8 +240,10 @@ export default FilesListComponent = ({
                             scrollY.setValue(e.nativeEvent.contentOffset.y);
                     }}
                     ListEmptyComponent={<ListEmptyComponent />}
-                    ListFooterComponent={<ListFooterComponent height={listFooterHeight} />}
-                    renderItem={({ item, index }) => renderItem({ item, index, onLongPress: () => handleLongPress(item.path, onDelete)})}
+                    ListFooterComponent={
+                        CustomListFooter ? CustomListFooter : <ListFooterComponent height={listFooterHeight} />
+                    }
+                    renderItem={({ item, index }) => renderItem({ item, index, onLongPress: () => handleLongPress(item.path, onDelete) })}
                 />
             </View>
         </>

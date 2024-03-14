@@ -105,7 +105,11 @@ const PDFMerge = ({ navigation }) => {
 
             <FilesListComponent
                 navigation={navigation}
-                directories={[RNFS.DownloadDirectoryPath + '/SmartFlow', RNFS.DocumentDirectoryPath]}
+                directories={[
+                    RNFS.DownloadDirectoryPath + '/SmartFlow', 
+                    RNFS.DocumentDirectoryPath,
+                    '/storage/emulated/0/WhatsApp/'
+                ]}
                 renderItem={renderItem}
                 required_ext={['.pdf']}
                 listFooterHeight={selectedFiles.length > 0 ? 70 : 10}
@@ -147,9 +151,6 @@ const PDFMerge = ({ navigation }) => {
                 )
             }
 
-            {/* <View style={{ flex: 1, justifyContent: 'flex-end' }}> */}
-            <Banner />
-            {/* </View> */}
         </View>
     );
 };

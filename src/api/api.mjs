@@ -3,7 +3,7 @@ import * as mime from 'mime';
 import { uploadFiles } from "react-native-fs";
 
 
-axios.defaults.baseURL = 'http://192.168.43.92:8001';
+axios.defaults.baseURL = 'http://3.111.103.148';
 
 
 export const generateAssignment = ({ title, successCallback, errorCallback }) => {
@@ -80,7 +80,6 @@ export const checkServerConnection = (onResponse) => {
     onResponse(false);
   });
   console.log('====================================');
-
 
 }
 

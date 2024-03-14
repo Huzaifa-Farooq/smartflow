@@ -28,7 +28,7 @@ const loadFiles = async ({
     directoryPath,
     directoriesToSkip = [
         'images', '/obb', 'cache', 'video', 'photo', 'voice', 'movies', 'music', '/dcim/',
-        'sdk', 'media', 'gallery', 'img', 'movie', 'temp'
+        'sdk', 'gallery', 'img', 'movie', 'temp'
     ],
     required_ext = ['*'],
 }) => {

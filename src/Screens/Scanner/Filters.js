@@ -106,11 +106,11 @@ const lightenImage = ({ imageSource, style, onExtractImage }) => (
 
 
 const Filters = {
+    'Text Magic': CombinedFiltersImage,
     'Original': defaultImage,
     'Grayscale': GrayscaledImage,
-    'CombinedFilters': CombinedFiltersImage,
-    'SharpenImage': sharpenImage,
-    'HighContrast': HighContrastImage,
+    'Sharpen': sharpenImage,
+    'High Contrast': HighContrastImage,
     'Inverted': InvertedImage,
     'Saturated': SaturatedImage,
     'SepiaTinted': SepiaTintedImage,

@@ -11,7 +11,7 @@ import Banner from '../../Components/BannersAd/Banner';
 import FileViewer from "react-native-file-viewer";
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize, sortFilesArray, searchFilesArray, getFileName } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, sortFilesArray, searchFilesArray, getFileName, loadFiles } from '../../utils/utils.mjs';
 import NotesOptionModal from '../../Components/NotesOptionModal';
 import { generateNotes } from '../../api/api.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
@@ -20,6 +20,7 @@ import DocumentPicker from 'react-native-document-picker';
 import NotesProgressModal from '../../Components/NotesProgressModal';
 import { ListEmptyComponent, CustomSearchBarView, FileLoadingComponent } from '../../Components/FilesList';
 import { animatedFilesListViewStyle } from '../../styles/styles';
+import FilesListComponent from '../../Components/FilesList';
 
 
 
@@ -69,60 +70,6 @@ const Notes = ({ navigation }) => {
     const Fileopener = (path) => {
         FileViewer.open(path, { showOpenWithDialog: true })
     };
-
-    useEffect(() => {
-        fetchPptFiles();
-    }, []);
-
-    const fetchPptFiles = async () => {
-        setLoading(true);
-        // setPptFiles([]);
-        const files = await listPptFiles();
-        setPptFiles(files);
-        setLoading(false);
-    };
-
-    const listPptFiles = useCallback(async (directoryPath = RNFS.ExternalStorageDirectoryPath) => {
-        const fileNames = await RNFS.readDir(directoryPath);
-        const requiredFiles = [];
-        const visitedDirectories = [];
-        const directoriesToSkip = [
-            'images', '/obb', 'cache', 'video', 'photo', 'voice', 'movies', 'music', '/dcim/',
-            'sdk', 'media', 'gallery', 'img', 'movie', 'temp', './'
-        ];
-
-        // Use Promise.all to parallelize file processing for better performance
-        await Promise.all(fileNames.map(async (file) => {
-            if (!file) return;
-            if (file && file.isFile() && (file.name.endsWith('.ppt') || file.name.endsWith('.pptx'))) {
-                requiredFiles.push(file);
-                // Update state as soon as a file is found
-                // if file already exists in the state, then don't add it again
-                if (!pptFiles.some((f) => f.path === file.path)) {
-                    setPptFiles((prevFiles) => [...prevFiles, file]);
-                }
-            } else if (file.isDirectory()) {
-                // checking if the directory is to be skipped
-                if (directoriesToSkip.some((dir) => file.path.toLowerCase().includes(dir))) {
-                    return;
-                }
-                console.log('Directory found: ', file.path)
-                // checking if the directory is already visited or not
-                if (visitedDirectories.includes(file.path)) {
-                    console.log('Already visited directory: ', file.path)
-                    return;
-                }
-                else {
-                    visitedDirectories.push(file.path);
-                    const subFiles = await listPptFiles(file.path);
-                    requiredFiles.push(...subFiles);
-                }
-            }
-        }));
-
-        return requiredFiles;
-    }, []);
-
 
     const handleFileSelect = ({ name, size, path }) => {
         console.log('File selected: ', path);
@@ -232,12 +179,6 @@ const Notes = ({ navigation }) => {
         )
     }
 
-    const files = useMemo(() => {
-        let f = search ? searchFilesArray({ files: pptFiles, query: search }) : pptFiles;
-        f = sortFilesArray({ files: f, mode: 'date', reversed: true });
-        return f;
-    }, [pptFiles, search]);
-
 
     const Header = useMemo(() => {
         return (
@@ -249,18 +190,8 @@ const Notes = ({ navigation }) => {
     }, [navigation]);
 
 
-    // if loading is true and no files are found, then show loading indicator
-    if ((loading && files.length === 0) || initialLoading) {
-        return (
-            <View style={styles.container}>
-                {Header}
-                <FileLoadingComponent />
-            </View>
-        )
-    }
     // if loading is true and and files are found, then show loading indicator below the files
     // if loading is false and files are found, then show files without loading indicator
-    else {
         return (
             <View style={styles.container}>
                 {Header}
@@ -269,33 +200,21 @@ const Notes = ({ navigation }) => {
                     allowMultiSelection={false}
                     onFileSelect={(file) => handleFileSelect(file)}
                 />
-                <CustomSearchBarView
-                    onChangeText={(text) => setSearch(text)}
-                    onClearPress={() => setSearch('')}
-                    search={search}
-                    viewStyle={{ transform: [{ translateY }] }}
-                    searchBarStyle={{ opacity: opacity }}
+
+                <FilesListComponent 
+                    navigation={navigation}
+                    directories={[
+                        RNFS.DownloadDirectoryPath + '/SmartFlow', 
+                        RNFS.DocumentDirectoryPath,
+                        '/storage/emulated/0/WhatsApp/'
+                    ]}
+                    renderItem={renderListItem}
+                    required_ext={['.ppt', '.pptx']}
+                    // listFooterHeight={files.length > 0 ? 70 : 10}
+                    // CustomListFooter={<ListFooter loading={loading} files={files} />}
+                    onFileClick={(file) => handleFileSelect(file)}
                 />
-                <View style={animatedFilesListViewStyle}>
-                    <Animated.FlatList
-                        style={{ marginTop }}
-                        ListEmptyComponent={<ListEmptyComponent />}
-                        refreshControl={
-                            <RefreshControl
-                                tintColor="#deb018"
-                                onRefresh={() => { fetchPptFiles() }}
-                                refreshing={false}
-                            />
-                        }
-                        bounces={true}
-                        onScroll={(e) => {
-                            if (e.nativeEvent.contentOffset.y > 0)
-                                scrollY.setValue(e.nativeEvent.contentOffset.y);
-                        }}
-                        data={files}
-                        ListFooterComponent={<ListFooter loading={loading} files={files} />}
-                        renderItem={renderListItem}
-                    />
+
 
                     {
                         displayModal && (
@@ -338,13 +257,8 @@ const Notes = ({ navigation }) => {
                             />
                         )
                     }
-                </View>
-                <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-                    <Banner />
-                </View>
             </View>
         );
-    }
 };
 
 const ListFooter = ({ loading, files }) => {

@@ -45,7 +45,7 @@ export default Scanner = ({ router, navigation }) => {
     }
     // start the document scanner
     const { scannedImages, status } = await DocumentScanner.scanDocument({
-      maxNumDocuments: 0,
+      maxNumDocuments: 10,
       letUserAdjustCrop: true,
       croppedImageQuality: 50
     });
@@ -54,7 +54,6 @@ export default Scanner = ({ router, navigation }) => {
       navigation.navigate('FilterSelectOption', { scannedImagesList: scannedImages });
     }
   }
-
 
   useEffect(() => {
     RNFS.mkdir(SCANNER_DOCUMENT_PATH);

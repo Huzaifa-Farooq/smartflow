@@ -8,6 +8,8 @@ import { useState } from 'react';
 import FileViewer from "react-native-file-viewer";
 import { createImagesPDF } from './utils';
 import ProgressModal from './ProgressModal';
+import { useMemo } from 'react';
+import React from 'react';
 
 
 const screenWidth = Dimensions.get('window').width;
@@ -111,23 +113,36 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
         setFilteredImages([...filteredImages, [srcURI, dstURI]]);
     }
 
-    const renderItem = ({ item: scannedImage, index }) => {
-        return (
-            <View style={styles.item}>
-                <ImageFilterComponent
-                    key={index}
-                    filterName={filterName}
-                    imagePath={scannedImage}
-                    onExtractImage={(event) => {
-                        onExtractImage({
-                            srcURI: scannedImage,
-                            dstURI: event.nativeEvent.uri
-                        })
-                    }}
-                />
-            </View>
-        )
-    }
+    // Define a memoized version of renderItem
+    const renderItem = useMemo(() => {
+        return ({ item: scannedImage, index }) => {
+            return (
+                <View style={styles.item}>
+                    <ImageFilterComponent
+                        key={index}
+                        filterName={filterName}
+                        imagePath={scannedImage}
+                        onExtractImage={(event) => {
+                            if (event.nativeEvent.uri) {
+                                onExtractImage({
+                                    srcURI: scannedImage,
+                                    dstURI: event.nativeEvent.uri
+                                })
+                            }
+                        }}
+                    />
+                </View>
+            )
+        }
+    }, [filterName, onExtractImage]);
+
+    <FlatList
+        data={scannedImagesList}
+        numColumns={numColumns}
+        keyExtractor={(item) => item}
+        renderItem={renderItem}
+        contentContainerStyle={{ justifyContent: 'space-between' }}
+    />
 
     return (
         <View style={{ flex: 1 }}>
@@ -159,12 +174,12 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
                     renderItem={renderItem}
                     contentContainerStyle={{ justifyContent: 'space-between' }}
                 />
-                <View style={{ 
-                    marginTop: 20, 
+                <View style={{
+                    marginTop: 20,
                     marginBottom: 20,
                     justifyContent: 'space-around',
-                    flexDirection: 'row', 
-                    }}>
+                    flexDirection: 'row',
+                }}>
                     <Button style={styles.button} title="Cancel" onPress={() => onUserAction(false)} />
                     <Button style={styles.button} title="Confirm" onPress={() => onUserAction(true)} />
                 </View>

@@ -1,13 +1,14 @@
 //import liraries
 import React from 'react';
-import { View, RefreshControl, StyleSheet, StatusBar, PermissionsAndroid, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, RefreshControl, StyleSheet, StatusBar, PermissionsAndroid, ScrollView, Text } from 'react-native';
+import RNFS from 'react-native-fs';
+
 import CustomHeader from '../../Components/CustomHeader';
 import HomeCard from '../../Components/HomeCard';
 import HomeCardTwo from '../../Components/HomeCardTwo';
-import HomeCardThree from '../../Components/HomeCardThree';
 import Banner from '../../Components/BannersAd/Banner';
-import { useEffect, useState } from 'react';
-import RNFS from 'react-native-fs';
+import SplashScreen from '../SplashScreen/SplashScreen';
 
 import ErrorDialog from '../../Components/ErrorDialog';
 import { checkServerConnection } from '../../api/api.mjs';
@@ -16,18 +17,28 @@ import { checkServerConnection } from '../../api/api.mjs';
 const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
 const Home = ({ navigation }) => {
-    const [isConnected, setIsConnected] = useState(true);
+    const [isConnected, setIsConnected] = useState(null);
     const [error, setError] = useState('');
-
+    const [showSplash, setShowSplash] = useState(true);
 
     const handleToggle = () => {
         navigation.openDrawer();
     }
 
     useEffect(() => {
-        requestPermission();
         RNFS.mkdir(SCANNER_DOCUMENT_PATH);
         checkServerConnection((val) => { setIsConnected(val) })
+
+        setTimeout(() => {
+            setShowSplash(false);
+        }, 2500);
+
+        if (!showSplash) {
+            // execute function after 1 second
+            setTimeout(() => {
+                requestPermission();
+            }, 500);
+        }
     }, []);
 
     const requestPermission = async () => {
@@ -77,6 +88,12 @@ const Home = ({ navigation }) => {
         })
     };
 
+    if (showSplash) {
+        return (
+            <SplashScreen />
+        )
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <StatusBar backgroundColor="#deb018" barStyle="dark-content" />
@@ -84,10 +101,10 @@ const Home = ({ navigation }) => {
             <ScrollView
                 refreshControl={
                     <RefreshControl
-                            tintColor="#deb018"
-                            onRefresh={() => { checkServerConnection((val) => { setIsConnected(val) })}}
-                            refreshing={false}
-                        />
+                        tintColor="#deb018"
+                        onRefresh={() => { checkServerConnection((val) => { setIsConnected(val) }) }}
+                        refreshing={false}
+                    />
                 }
             >
                 <View style={{
@@ -137,14 +154,12 @@ const Home = ({ navigation }) => {
                         onPress={() => navigation.navigate("Downloads")}
                     />
                 </View>
+                <Text></Text>
             </ScrollView>
 
             {error && <ErrorDialog iconColor='black' textColor='black' iconName='wifi-off' error={error} onClose={() => setError('')} />}
 
-
-            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-                <Banner />
-            </View>
+            <Banner />
 
         </View>
     );

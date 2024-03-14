@@ -5,7 +5,6 @@ import CustomHeader from '../../Components/CustomHeader';
 import Banner from '../../Components/BannersAd/Banner';
 import RNFS from 'react-native-fs';
 import FileViewer from "react-native-file-viewer";
-import LottieView from 'lottie-react-native';
 
 
 import { generateAssignment } from '../../api/api.mjs';
@@ -126,7 +125,7 @@ const Assignment = ({ navigation }) => {
             />
 
             <View style={{ flex: 1, justifyContent: 'space-between' }}>
-                <TextInput 
+                <TextInput
                     multiline={true}
                     placeholder='Enter your Topic'
                     placeholderTextColor='#777777'
@@ -185,12 +184,11 @@ const Assignment = ({ navigation }) => {
                     onPress={handleAssignmentInput}
                     disabled={topic === ''}
                 >
-                    <Text style={ styles.btnText }>Generate</Text>
+                    <Text style={styles.btnText}>Generate</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-                <Banner />
-            </View>
+
+            <Banner />
         </View>
     );
 

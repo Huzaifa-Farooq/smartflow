@@ -10,11 +10,14 @@ import SubScreenHeader from '../../Components/SubScreenHeader';
 const { height, width } = Dimensions.get('window');
 
 
+DEFAULT_FILTER = 'Text Magic';
+
+
 export default FiltersOptionComponent = ({ route, navigation }) => {
     const { scannedImagesList } = route.params;
 
     const imageSource = { uri: scannedImagesList[0] };
-    const [selectedFilter, setSelectedFilter] = useState('Original');
+    const [selectedFilter, setSelectedFilter] = useState(DEFAULT_FILTER);
 
     return (
         <View style={styles.container}>
@@ -44,12 +47,14 @@ export default FiltersOptionComponent = ({ route, navigation }) => {
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
+                        
                         style={styles.scrollView}
                     >
                         {
                             Object.entries(Filters).map(([filterName, FilterComponent]) => {
                                 return (
                                     <FilterImageOption
+                                        isSelected={selectedFilter === filterName}
                                         key={filterName}
                                         filterName={filterName}
                                         FilterComponent={FilterComponent}
@@ -68,15 +73,21 @@ export default FiltersOptionComponent = ({ route, navigation }) => {
 }
 
 
-const FilterImageOption = ({ filterName, onPress, FilterComponent, imageSource, onExtractImage }) => {
+const FilterImageOption = ({ filterName, onPress, FilterComponent, imageSource, onExtractImage, isSelected }) => {
     return (
         <TouchableOpacity
             style={styles.item}
             onPress={onPress}
         >
-            <View>
+            <View
+                style={[
+                    isSelected ? { borderColor: '#deb018', borderWidth: 2 } : {},
+                ]}
+            >
                 <FilterComponent imageSource={imageSource} style={styles.filterOptImg} onExtractImage={onExtractImage} />
-                <Text style={styles.text} >{filterName}</Text>
+                <View style={styles.textView}>
+                    <Text ellipsizeMode={'tail'} style={styles.text} >{filterName}</Text>
+                </View>
             </View>
         </TouchableOpacity>
     );
@@ -90,18 +101,29 @@ const styles = StyleSheet.create({
     scrollView: {
         marginTop: 20,
         marginBottom: 5,
+        marginLeft: 5,
+        width: width - 10,
         paddingLeft: 8,
         paddingRight: 18,
+        backgroundColor: '#f2f2f2',
+        borderRadius: 10, 
+        elevation: 5, 
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
     },
     item: {
-        width: 70,
-        height: 70,
+        width: 75,
+        height: 80,
         marginRight: 5,
+        paddingTop: 5,
+
         justifyContent: 'center',
         alignItems: 'center',
     },
     filterOptImg: {
-        width: 70, height: 70, marginBottom: 5
+        width: 70, height: 70
     },
     capturedimage: {
         height: height / 1.6,
@@ -112,13 +134,18 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "grey",
     },
+    textView: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        // paddingLeft: 1,
+        width: 70,
+        bottom: 0
+    },
     text: {
-        position: "absolute",
         color: 'white',
-        fontSize: 8,
-        fontWeight: "700",
-        bottom: 8,
-        marginHorizontal: 12
+        fontSize: 9,
     },
     bottomview: {
         height: 30,
