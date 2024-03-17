@@ -11,23 +11,19 @@ import Banner from '../../Components/BannersAd/Banner';
 import FileViewer from "react-native-file-viewer";
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize, sortFilesArray, searchFilesArray, getFileName, loadFiles } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, getFileName } from '../../utils/utils.mjs';
 import NotesOptionModal from '../../Components/NotesOptionModal';
 import { generateNotes } from '../../api/api.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
 import FileSelectButton from '../../Components/FileSelectButton';
 import DocumentPicker from 'react-native-document-picker';
 import NotesProgressModal from '../../Components/NotesProgressModal';
-import { ListEmptyComponent, CustomSearchBarView, FileLoadingComponent } from '../../Components/FilesList';
-import { animatedFilesListViewStyle } from '../../styles/styles';
 import FilesListComponent from '../../Components/FilesList';
-
+import RNFetchBlob from 'rn-fetch-blob';
 
 
 // create a component
 const Notes = ({ navigation }) => {
-    const [pptFiles, setPptFiles] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [displayModal, setDisplayModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState({});
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -35,43 +31,15 @@ const Notes = ({ navigation }) => {
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState();
-    const [search, setSearch] = useState('');
-    const [initialLoading, setInitialLoading] = useState(true);
-
-    const scrollY = useRef(new Animated.Value(0)).current;
-    const diffClamp = Animated.diffClamp(scrollY, 0, 100);
-
-    const translateY = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -60],
-        extrapolate: 'clamp',
-    });
-
-    const opacity = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-    });
-
-    const marginTop = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -30],
-        extrapolate: 'clamp',
-    });
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setInitialLoading(false);
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, []);
 
     const Fileopener = (path) => {
         FileViewer.open(path, { showOpenWithDialog: true })
     };
 
-    const handleFileSelect = ({ name, size, path }) => {
+    const handleFileSelect = async ({ name, size, path, uri }) => {
+        if (!path && uri){
+            path = (await RNFetchBlob.fs.stat(uri)).path;
+        }
         console.log('File selected: ', path);
         setDisplayModal(true);
         setSelectedFile({ name, size, path });
@@ -123,7 +91,6 @@ const Notes = ({ navigation }) => {
             console.log('No file to download')
             setError('No file to download');
         }
-
     }
 
     const downloadFile = async ({ fileUrl, fileName }) => {
@@ -145,7 +112,7 @@ const Notes = ({ navigation }) => {
                 // Handle download progress updates if needed
                 const val = (progressResponse.bytesWritten / progressResponse.contentLength) * 100;
                 // display progress to user
-                setDownloadProgress(val);
+                val > downloadProgress ? setDownloadProgress(val) : null;
                 console.log(`Download progress val: ${val}%`);
             },
         })
@@ -171,15 +138,6 @@ const Notes = ({ navigation }) => {
             });
     };
 
-    const renderListItem = ({ item, index }) => {
-        return (
-            <TouchableHighlight onPress={() => handleFileSelect(item)} underlayColor={'white'}  >
-                <DocumentItem iconSrc={getFileIcon(item.name)} title={item.name} size={formatSize(item.size)} />
-            </TouchableHighlight>
-        )
-    }
-
-
     const Header = useMemo(() => {
         return (
             <CustomHeader title={'Notes'}
@@ -192,73 +150,73 @@ const Notes = ({ navigation }) => {
 
     // if loading is true and and files are found, then show loading indicator below the files
     // if loading is false and files are found, then show files without loading indicator
-        return (
-            <View style={styles.container}>
-                {Header}
-                <FileSelectButton
-                    allowedTypes={[DocumentPicker.types.ppt, DocumentPicker.types.pptx]}
-                    allowMultiSelection={false}
-                    onFileSelect={(file) => handleFileSelect(file)}
+    return (
+        <View style={styles.container}>
+            {Header}
+            <FileSelectButton
+                allowedTypes={[DocumentPicker.types.ppt, DocumentPicker.types.pptx]}
+                allowMultiSelection={false}
+                onFileSelect={(file) => handleFileSelect(file)}
+            />
+
+            <FilesListComponent
+                navigation={navigation}
+                directories={[
+                    RNFS.DownloadDirectoryPath + '/SmartFlow',
+                    RNFS.DocumentDirectoryPath,
+                    '/storage/emulated/0/WhatsApp/',
+                    '/Internal storage/Android/media/com.whatsapp/WhatsApp/'
+                ]}
+                required_ext={['.ppt', '.pptx']}
+                // listFooterHeight={files.length > 0 ? 70 : 10}
+                // CustomListFooter={<ListFooter loading={loading} files={files} />}
+                onFileClick={(file) => handleFileSelect(file)}
+            />
+
+
+            {
+                displayModal && (
+                    <NotesOptionModal
+                        onClose={() => setDisplayModal(false)}
+                        onButtonPress={handleNotesRequest}
+                    />
+                )
+            }
+
+            {
+                <NotesProgressModal
+                    uploadProgress={uploadProgress}
+                    uploadInProgress={uploadProgress > 0 && uploadProgress < 100}
+                    downloadProgress={downloadProgress}
+                    fileDownloadInProgress={downloadProgress > 0 && downloadProgress < 100}
+                    notesGenerationInProgress={
+                        requestInProgress &&
+                        (uploadProgress == 0 || uploadProgress == 100) &&
+                        (downloadProgress == 0 || downloadProgress == 100)
+                    }
                 />
+            }
 
-                <FilesListComponent 
-                    navigation={navigation}
-                    directories={[
-                        RNFS.DownloadDirectoryPath + '/SmartFlow', 
-                        RNFS.DocumentDirectoryPath,
-                        '/storage/emulated/0/WhatsApp/'
-                    ]}
-                    renderItem={renderListItem}
-                    required_ext={['.ppt', '.pptx']}
-                    // listFooterHeight={files.length > 0 ? 70 : 10}
-                    // CustomListFooter={<ListFooter loading={loading} files={files} />}
-                    onFileClick={(file) => handleFileSelect(file)}
-                />
+            {
+                downloadedFile && downloadProgress == 100 && (
+                    <NotesOutputComponent
+                        downloadedFile={downloadedFile}
+                        onPress={() => Fileopener(downloadedFile.path)}
+                        onClose={() => setDownloadedFile(null)}
+                    />
+                )
+            }
 
-
-                    {
-                        displayModal && (
-                            <NotesOptionModal
-                                onClose={() => setDisplayModal(false)}
-                                onButtonPress={handleNotesRequest}
-                            />
-                        )
-                    }
-
-                    {
-                        <NotesProgressModal
-                            uploadProgress={uploadProgress}
-                            uploadInProgress={uploadProgress > 0 && uploadProgress < 100}
-                            downloadProgress={downloadProgress}
-                            fileDownloadInProgress={downloadProgress > 0 && downloadProgress < 100}
-                            notesGenerationInProgress={
-                                requestInProgress &&
-                                (uploadProgress == 0 || uploadProgress == 100) &&
-                                (downloadProgress == 0 || downloadProgress == 100)
-                            }
-                        />
-                    }
-
-                    {
-                        downloadedFile && downloadProgress == 100 && (
-                            <NotesOutputComponent
-                                downloadedFile={downloadedFile}
-                                onPress={() => Fileopener(downloadedFile.path)}
-                                onClose={() => setDownloadedFile(null)}
-                            />
-                        )
-                    }
-
-                    {
-                        (error) && (
-                            <ErrorDialog
-                                onClose={() => setError(null)}
-                                error={error}
-                            />
-                        )
-                    }
-            </View>
-        );
+            {
+                (error) && (
+                    <ErrorDialog
+                        onClose={() => setError(null)}
+                        error={error}
+                    />
+                )
+            }
+        </View>
+    );
 };
 
 const ListFooter = ({ loading, files }) => {
@@ -281,32 +239,38 @@ const NotesOutputComponent = ({ downloadedFile, onPress, onClose }) => {
             onRequestClose={onClose}
         >
             <TouchableWithoutFeedback onPress={onClose}>
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }} >
                 <View
                     style={{
-                        height: 150,
-                        backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                    }}
-                >
-                    <View style={{
                         flex: 1,
                         justifyContent: 'center',
                         alignItems: 'center',
-                    }}>
-                        <TouchableHighlight
-                            underlayColor={''}
-                            onPress={onPress}
-                        >
-                            <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
-                        </TouchableHighlight>
+                    }} >
+                    <View
+                        style={{
+                            height: 150,
+                            backgroundColor: '#ffff',
+                            // ading shadows
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 1,
+                            shadowRadius: 3.84,
+                            
+                        }}
+                    >
+                        <View style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                            <TouchableHighlight
+                                underlayColor={''}
+                                onPress={onPress}
+                            >
+                                <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
+                            </TouchableHighlight>
+                        </View>
                     </View>
                 </View>
-            </View>
 
             </TouchableWithoutFeedback>
         </Modal>

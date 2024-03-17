@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions, Alert } from 'react-native';
+import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions, Alert, FlatList } from 'react-native';
 import SearchBar from "react-native-dynamic-search-bar";
 import AnimatedIcon from './AnimatedIcon';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -147,7 +147,13 @@ export default FilesListComponent = ({
 
 
     useEffect(() => {
-        folderReader();
+        try{
+            folderReader();
+        } catch (e) {
+            console.log('==== Error reading directories ====');
+            console.log('Error: ' + e);
+            console.log('===================================');
+        }
     }, [])
 
     const folderReader = async () => {
@@ -167,7 +173,7 @@ export default FilesListComponent = ({
     };
 
     if (!onFileClick) {
-        onFileClick = (path) => {
+        onFileClick = ({ path }) => {
             FileViewer.open(path, { showOpenWithDialog: true })
         }
     }
@@ -185,7 +191,7 @@ export default FilesListComponent = ({
             return (
                 <TouchableHighlight
                     underlayColor={''}
-                    onPress={() => { onFileClick(item.path) }}
+                    onPress={() => { onFileClick(item) }}
                     onLongPress={() => handleLongPress(item.path, onDelete)}
                 >
                     <DocumentItem
@@ -197,7 +203,6 @@ export default FilesListComponent = ({
             )
         }
     }
-
 
     const files = useMemo(() => {
         let f = search ? searchFilesArray({ files: result, query: search }) : result;
@@ -239,11 +244,15 @@ export default FilesListComponent = ({
                         if (e.nativeEvent.contentOffset.y > 0)
                             scrollY.setValue(e.nativeEvent.contentOffset.y);
                     }}
-                    ListEmptyComponent={<ListEmptyComponent />}
+                    ListEmptyComponent={loading ? null : <ListEmptyComponent />}
                     ListFooterComponent={
                         CustomListFooter ? CustomListFooter : <ListFooterComponent height={listFooterHeight} />
                     }
                     renderItem={({ item, index }) => renderItem({ item, index, onLongPress: () => handleLongPress(item.path, onDelete) })}
+                    removeClippedSubviews={true}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={8}
+                    windowSize={5} 
                 />
             </View>
         </>
@@ -255,7 +264,7 @@ const onShare = async (filePath) => {
     const options = {
         title: 'Share',
         message: 'Sent via Smartflow',
-        url: 'file://' + filePath,
+        url: `file://${encodeURIComponent(filePath)}`
     };
     try {
         const result = await Share.open(options);

@@ -1,4 +1,17 @@
 import RNFS from 'react-native-fs';
+import { readPpt } from 'react-native-ppt-to-text';
+
+
+
+export const extractTextFromPpt = async (path) => {
+    try {
+        const text = await readPpt(path);
+        return text;
+    } catch (e) {
+        console.log('Error extracting text from ppt: ', e);
+        return '';
+    }
+}
 
 
 const isPdf = (name) => {
@@ -6,8 +19,11 @@ const isPdf = (name) => {
 };
 
 const formatSize = (size) => {
-    if (!size) return '0KB';
-    return size > 100000 ? ((size / 100000).toFixed(2) + 'MB') : ((size / 1000).toFixed(2) + 'KB');
+    if (!size) return '0 Bytes';
+
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(size) / Math.log(1024));
+    return parseFloat((size / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 const getFileIcon = (name) => {
@@ -42,7 +58,19 @@ const loadFiles = async ({
         }
     }
 
-    const fileNames = await RNFS.readDir(directoryPath);
+    if (!RNFS.exists(encodeURIComponent(directoryPath))){
+        return [];
+    }
+
+    let fileNames = [];
+    try{
+        fileNames = await RNFS.readDir(directoryPath);
+    } catch (e) {
+        console.log('============== Error reading directory ======================');
+        console.log('Directory: ' + directoryPath);
+        console.log('====================================');
+        return [];
+    }
     const requiredFiles = [];
     const visitedDirectories = [];
 

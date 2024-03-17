@@ -1,9 +1,10 @@
 import axios from 'axios';
 import * as mime from 'mime';
 import { uploadFiles } from "react-native-fs";
+import { readPpt } from 'react-native-ppt-to-text';
 
 
-axios.defaults.baseURL = 'http://3.111.103.148';
+axios.defaults.baseURL = 'http://3.111.103.148/';
 
 
 export const generateAssignment = ({ title, successCallback, errorCallback }) => {
@@ -25,8 +26,7 @@ export const generateAssignment = ({ title, successCallback, errorCallback }) =>
 }
 
 
-export const generateNotes = async ({ filePath, fileName, actionCode, progress, successCallback, errorCallback }) => {
-
+const generateNotesWithFile = async ({ filePath, fileName, actionCode, progress, successCallback, errorCallback }) => {
   const files = [
     {
       name: 'file',
@@ -37,9 +37,8 @@ export const generateNotes = async ({ filePath, fileName, actionCode, progress, 
   ];
 
   try {
-
     uploadFiles({
-      toUrl: `${axios.defaults.baseURL}/generate_notes?action_code=${actionCode}`,
+      toUrl: `${axios.defaults.baseURL}/generate_notes?action_code=${actionCode}&filename=${fileName}`,
       files: files,
       method: "POST",
       headers: {
@@ -47,12 +46,13 @@ export const generateNotes = async ({ filePath, fileName, actionCode, progress, 
       },
       progress: (resp) => {
         const p = (resp.totalBytesSent / resp.totalBytesExpectedToSend) * 100;
-        if (p > 99.0) {
-          progress(100);
-        }
-        else {
-          progress(p);
-        }
+        console.log('Progress: ' + p);
+          if (p > 99.0) {
+            progress(100);
+          }
+          else {
+            progress(p);
+          }
       }
     })
       .promise.then((response) => {
@@ -62,6 +62,55 @@ export const generateNotes = async ({ filePath, fileName, actionCode, progress, 
       .catch((error) => {
         console.log(error);
         errorCallback("Error uploading file.");
+      });
+  }
+  catch (error) {
+    errorCallback('Error while generating notes.');
+  }
+}
+
+export const generateNotes = async ({
+  filePath, fileName, actionCode, progress, successCallback, errorCallback
+}) => {
+  try {
+    let pptText = await readPpt(encodeURI(filePath));
+    // converting pptText array to string joined by '||||'
+    pptText = pptText.join('||||');
+    console.log('pptText: ', pptText);
+    progress(100);
+    generateNotesWithText({
+      pptText: pptText,
+      fileName: fileName,
+      actionCode: actionCode,
+      successCallback: successCallback,
+      errorCallback: errorCallback
+    });
+  } catch (error) {
+    console.log('Error reading ppt file ' + error);
+
+    generateNotesWithFile({
+      filePath: filePath,
+      fileName: fileName,
+      actionCode: actionCode,
+      progress: progress,
+      successCallback: successCallback,
+      errorCallback: errorCallback
+    });
+  }
+}
+
+
+const generateNotesWithText = async ({ pptText, fileName, actionCode, successCallback, errorCallback }) => {
+  try {
+    axios.post(`${axios.defaults.baseURL}/generate_notes?action_code=${actionCode}&filename=${fileName}&ppt_text=${pptText}`, {
+    }
+    )
+      .then((response) => {
+        successCallback(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        errorCallback("Error sending text.");
       });
   }
   catch (error) {

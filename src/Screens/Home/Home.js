@@ -33,12 +33,9 @@ const Home = ({ navigation }) => {
             setShowSplash(false);
         }, 2500);
 
-        if (!showSplash) {
-            // execute function after 1 second
-            setTimeout(() => {
-                requestPermission();
-            }, 500);
-        }
+        setTimeout(() => {
+            requestPermission();
+        }, 500);
     }, []);
 
     const requestPermission = async () => {
@@ -68,9 +65,6 @@ const Home = ({ navigation }) => {
     };
 
     const handleNavigation = (path) => {
-        console.log('====================================');
-        console.log(isConnected);
-        console.log('====================================');
         if (isConnected) {
             navigation.navigate(path);
         } else if (!isConnected) {
@@ -79,10 +73,9 @@ const Home = ({ navigation }) => {
     };
 
     const createfolder = async () => {
-        const file = RNFS.DownloadDirectoryPath + '/SmartFlow/';
-        RNFS.mkdir(file).then(res => {
+        const folder = RNFS.DownloadDirectoryPath + '/SmartFlow/';
+        RNFS.mkdir(folder).then(res => {
             console.log('folder created');
-            console.log(RNFS.DownloadDirectoryPath + '/SmartFlow/');
         }).catch(error => {
             console.log(error);
         })
@@ -164,12 +157,5 @@ const Home = ({ navigation }) => {
         </View>
     );
 };
-
-// define your styles
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-});
 
 export default Home;
