@@ -1,0 +1,9 @@
+{
+  "name": "react-native-ppt-to-text",
+  "version": "0.0.0",
+  "description": "Extract text from ppt and pptx files",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme"
+}
