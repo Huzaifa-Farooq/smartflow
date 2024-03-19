@@ -26,7 +26,9 @@ export const generateAssignment = ({ title, successCallback, errorCallback }) =>
 }
 
 
-const generateNotesWithFile = async ({ filePath, fileName, actionCode, progress, successCallback, errorCallback }) => {
+const generateNotesWithFile = async ({ 
+  filePath, fileName, actionCode, progress, successCallback, errorCallback
+ }) => {
   const files = [
     {
       name: 'file',
@@ -76,7 +78,7 @@ export const generateNotes = async ({
     let pptText = await readPpt(encodeURI(filePath));
     // converting pptText array to string joined by '||||'
     pptText = pptText.join('||||');
-    console.log('pptText: ', pptText);
+    // console.log('pptText: ', pptText);
     progress(100);
     generateNotesWithText({
       pptText: pptText,

@@ -13,6 +13,56 @@ import SplashScreen from '../SplashScreen/SplashScreen';
 import ErrorDialog from '../../Components/ErrorDialog';
 import { checkServerConnection } from '../../api/api.mjs';
 
+import BackgroundFetch from "react-native-background-fetch";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loadFiles } from '../../utils/utils.mjs';
+
+
+const loadAndSavePPTDirectoryPaths = async () => {
+    const files = await loadFiles({
+        directoryPath: RNFS.ExternalStorageDirectoryPath,
+        required_ext: ['.pdf'],
+    });
+    const directoryPaths = files.map(file => file.path.split('/').slice(0, -1).join('/'))
+    // removing duplicates from directoryPaths
+    const uniqueDirectoryPaths = [...new Set(directoryPaths)];
+
+    try {
+        // removing PPTDirectoryPaths
+        await AsyncStorage.removeItem('@PPTDirectoryPaths');
+        // adding directories to PPTDirectoryPaths
+        await AsyncStorage.setItem('@PPTDirectoryPaths', JSON.stringify(uniqueDirectoryPaths));
+    } catch (e) {
+        console.log('Error saving PPTDirectoryPaths ' + e);
+    }
+}
+
+
+let BackgroundFilesFetchTask = async (event) => {
+    await loadAndSavePPTDirectoryPaths();
+    BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+}
+
+// Configuration
+BackgroundFetch.configure(
+    {
+        minimumFetchInterval: 24 * 60,
+        stopOnTerminate: false,
+        enableHeadless: true,
+        requiresBatteryNotLow: true,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresNetworkConnectivity: false,
+    },
+    onTimeout = () => {
+        console.log('BackgroundFetch timeout');
+    },
+    BackgroundFilesFetchTask
+);
+
+// Start the background fetch
+BackgroundFetch.start();
+
 
 const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
@@ -26,6 +76,19 @@ const Home = ({ navigation }) => {
     }
 
     useEffect(() => {
+        AsyncStorage.getItem('@PPTDirectoryPaths')
+            .then((value) => {
+                if (value === null) {
+                    // trigger BackgroundFilesFetchTask
+                    BackgroundFilesFetchTask();
+                } else {
+                    console.log('PPTDirectoryPaths already exists. \n' + value);
+                }
+            })
+            .catch((e) => {
+                console.log('Error getting PDFDirectoryPaths ' + e);
+            });
+
         RNFS.mkdir(SCANNER_DOCUMENT_PATH);
         checkServerConnection((val) => { setIsConnected(val) })
 

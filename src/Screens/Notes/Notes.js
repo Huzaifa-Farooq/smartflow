@@ -20,6 +20,7 @@ import DocumentPicker from 'react-native-document-picker';
 import NotesProgressModal from '../../Components/NotesProgressModal';
 import FilesListComponent from '../../Components/FilesList';
 import RNFetchBlob from 'rn-fetch-blob';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // create a component
@@ -31,13 +32,24 @@ const Notes = ({ navigation }) => {
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState();
+    const [pptDirectories, setPPTDirectories] = useState([
+        RNFS.DownloadDirectoryPath + '/SmartFlow',
+        RNFS.DocumentDirectoryPath,
+        '/storage/emulated/0/WhatsApp/',
+        '/Internal storage/Android/media/com.whatsapp/WhatsApp/',
+        '/Internal storage/Android/media/com.whatsapp'
+    ]);
+
+    useEffect(() => {
+        getPPTDirectories();
+    }, []);
 
     const Fileopener = (path) => {
         FileViewer.open(path, { showOpenWithDialog: true })
     };
 
     const handleFileSelect = async ({ name, size, path, uri }) => {
-        if (!path && uri){
+        if (!path && uri) {
             path = (await RNFetchBlob.fs.stat(uri)).path;
         }
         console.log('File selected: ', path);
@@ -148,6 +160,18 @@ const Notes = ({ navigation }) => {
     }, [navigation]);
 
 
+    const getPPTDirectories = () => {
+        AsyncStorage.getItem('@PPTDirectoryPaths')
+            .then((value) => {
+                if (value !== null) {
+                    setPPTDirectories(JSON.parse(value));
+                }
+            })
+            .catch((e) => {
+                console.log('Error getting PPTDirectoryPaths ' + e);
+            });
+    };
+
     // if loading is true and and files are found, then show loading indicator below the files
     // if loading is false and files are found, then show files without loading indicator
     return (
@@ -161,12 +185,7 @@ const Notes = ({ navigation }) => {
 
             <FilesListComponent
                 navigation={navigation}
-                directories={[
-                    RNFS.DownloadDirectoryPath + '/SmartFlow',
-                    RNFS.DocumentDirectoryPath,
-                    '/storage/emulated/0/WhatsApp/',
-                    '/Internal storage/Android/media/com.whatsapp/WhatsApp/'
-                ]}
+                directories={pptDirectories}
                 required_ext={['.ppt', '.pptx']}
                 // listFooterHeight={files.length > 0 ? 70 : 10}
                 // CustomListFooter={<ListFooter loading={loading} files={files} />}
@@ -254,7 +273,7 @@ const NotesOutputComponent = ({ downloadedFile, onPress, onClose }) => {
                             shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 1,
                             shadowRadius: 3.84,
-                            
+
                         }}
                     >
                         <View style={{
