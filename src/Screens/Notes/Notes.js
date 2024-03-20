@@ -78,7 +78,11 @@ const Notes = ({ navigation }) => {
                 console.log('error while generating notes');
                 console.error(JSON.stringify(error));
                 // printing error message to user
-                setError('Error while generating notes');
+                if (error.includes('uploading file')){
+                    setError('Error uploading file');
+                } else {
+                    setError('Error while generating notes');
+                }
 
                 setDisplayModal(false);
                 setUploadProgress(0);
@@ -220,7 +224,10 @@ const Notes = ({ navigation }) => {
                 downloadedFile && downloadProgress == 100 && (
                     <NotesOutputComponent
                         downloadedFile={downloadedFile}
-                        onPress={() => Fileopener(downloadedFile.path)}
+                        onPress={() => { navigation.navigate('DocViewer', {     
+                            path: downloadedFile.path, 
+                            name: downloadedFile.name
+                        }) }}
                         onClose={() => setDownloadedFile(null)}
                     />
                 )

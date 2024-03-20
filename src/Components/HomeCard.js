@@ -1,16 +1,22 @@
 
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, Image, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
 
 const { height, width } = Dimensions.get('window');
 
-const HomeCard = ({ iconName, txt, iconColor, iconBackgroundColor, onPress, topRightIconName }) => {
+const HomeCard = ({ iconName, imageSource, txt, iconColor, iconBackgroundColor, onPress, topRightIconName }) => {
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.container,{ backgroundColor: iconBackgroundColor }]}>
+        <TouchableOpacity onPress={onPress} style={[styles.container, { backgroundColor: iconBackgroundColor }]}>
             <View style={styles.iconContainer}>
-                <MaterialCommunityIcons name={iconName} size={40} color={iconColor} />
+                {
+                    iconName ? (
+                        <MaterialCommunityIcons name={iconName} size={40} color={iconColor} />
+                    ) : (
+                        <Image source={imageSource} style={styles.image} />
+                    )
+                }
             </View>
             <View style={styles.textContainer}>
                 <Text style={styles.text}>{txt}</Text>
@@ -36,7 +42,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 20,
         elevation: 3,
-       
+
     },
     iconContainer: {
         position: 'absolute',
@@ -45,7 +51,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 5,
         padding: 5,
-       
+
     },
     textContainer: {
         position: 'absolute',
@@ -61,7 +67,7 @@ const styles = StyleSheet.create({
         color: '#000',
         // fontWeight:'bold',
         fontFamily: 'ProximaNova-Regular',
-        
+
     },
     topRightIconContainer: {
         position: 'absolute',
@@ -70,4 +76,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    image: {
+        height: 50,
+        width: 50
+    }
 });

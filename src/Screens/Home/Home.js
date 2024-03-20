@@ -1,7 +1,7 @@
 //import liraries
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { View, RefreshControl, StyleSheet, StatusBar, PermissionsAndroid, ScrollView, Text } from 'react-native';
+import { View, RefreshControl, StatusBar, PermissionsAndroid, ScrollView, Text } from 'react-native';
 import RNFS from 'react-native-fs';
 
 import CustomHeader from '../../Components/CustomHeader';
@@ -188,7 +188,7 @@ const Home = ({ navigation }) => {
                     justifyContent: 'space-around',
                     marginTop: 20
                 }}>
-                    <HomeCard txt={'PDFMerger'}
+                    <HomeCard txt={'PDF Merger'}
                         iconName='file-document-multiple'
                         iconColor={'#E60FB7'}
                         iconBackgroundColor={"#E2D0DE"}
@@ -196,7 +196,8 @@ const Home = ({ navigation }) => {
                     />
 
                     <HomeCard txt={'Scanner'}
-                        iconName='camera-document'
+                        // iconName='camera-document'
+                        imageSource={require('../../assets/Images/Scanning.png')}
                         iconColor={'#2A3BE2'}
                         iconBackgroundColor={"#CDCEE0"}
                         onPress={() => navigation.navigate("Scanner")}
@@ -204,7 +205,7 @@ const Home = ({ navigation }) => {
                 </View>
                 <View >
                     <HomeCardTwo txt={'My Files'}
-                        iconName='download'
+                        iconName='file-document'
                         iconColor={'#E28C20'}
                         iconBackgroundColor={"#ebeda8"}
                         onPress={() => navigation.navigate("Downloads")}

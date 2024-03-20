@@ -1,7 +1,7 @@
 import { FlatList } from 'react-native';
 import { Dimensions, StyleSheet } from 'react-native';
 import { Filter } from './Filters';
-import { Image, Text, Platform, PermissionsAndroid, TextInput, View, Button } from 'react-native'
+import { Image, Text, Platform, TouchableOpacity, TextInput, View, Button } from 'react-native'
 import SubScreenHeader from '../../Components/SubScreenHeader';
 import RNFS from 'react-native-fs';
 import { useState } from 'react';
@@ -180,11 +180,28 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
                     justifyContent: 'space-around',
                     flexDirection: 'row',
                 }}>
-                    <Button style={styles.button} title="Cancel" onPress={() => onUserAction(false)} />
-                    <Button style={styles.button} title="Confirm" onPress={() => onUserAction(true)} />
+                    <CustomButton isPrimary={true} title="Cancel" onPress={() => onUserAction(false)} />
+                    <CustomButton title="Confirm" onPress={() => onUserAction(true)} />
                 </View>
             </View>
         </View>
+    )
+}
+
+
+const CustomButton = ({ onPress, title, isPrimary }) => {
+    return (
+        <TouchableOpacity
+            style={
+                [
+                    styles.button,
+                    isPrimary ? styles.buttonPrimary : styles.buttonDefault
+                ]
+            }
+            onPress={onPress}
+        >
+            <Text style={styles.buttonText}>{title}</Text>
+        </TouchableOpacity>
     )
 }
 
@@ -217,11 +234,21 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
     button: {
-        width: '100%',
-        height: 50,
-        justifyContent: 'center',
+        width: '30%',
+        padding: 10,
+        alignSelf: 'center',
+        borderRadius: 10,
         alignItems: 'center',
-        backgroundColor: '#09C3B6',
-        borderRadius: 5,
+    },
+    buttonPrimary: {
+        backgroundColor: 'lightblue'
+    },
+    buttonDefault: {
+        backgroundColor: 'skyblue',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold'
     }
 });

@@ -98,7 +98,7 @@ const PDFMerge = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <CustomHeader
-                title={'PDFMerger'}
+                title={'PDF Merger'}
                 icon={"keyboard-backspace"}
                 onPress={() => navigation.goBack()}
             />

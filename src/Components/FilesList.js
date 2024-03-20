@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { View, Text, Animated, RefreshControl, TouchableHighlight, Dimensions, Alert, FlatList } from 'react-native';
 import SearchBar from "react-native-dynamic-search-bar";
 import AnimatedIcon from './AnimatedIcon';
@@ -147,7 +147,7 @@ export default FilesListComponent = ({
 
 
     useEffect(() => {
-        try{
+        try {
             folderReader();
         } catch (e) {
             console.log('==== Error reading directories ====');
@@ -173,8 +173,12 @@ export default FilesListComponent = ({
     };
 
     if (!onFileClick) {
-        onFileClick = ({ path }) => {
-            FileViewer.open(path, { showOpenWithDialog: true })
+        onFileClick = ({ name, path }) => {
+            if (path.endsWith('.pdf')) {
+                navigation.navigate('DocViewer', { path, name })
+            } else {
+                FileViewer.open(path, { showOpenWithDialog: true });
+            }
         }
     }
 
@@ -202,7 +206,8 @@ export default FilesListComponent = ({
                 </TouchableHighlight>
             )
         }
-    }
+    };
+
 
     const files = useMemo(() => {
         let f = search ? searchFilesArray({ files: result, query: search }) : result;
@@ -249,10 +254,9 @@ export default FilesListComponent = ({
                         CustomListFooter ? CustomListFooter : <ListFooterComponent height={listFooterHeight} />
                     }
                     renderItem={({ item, index }) => renderItem({ item, index, onLongPress: () => handleLongPress(item.path, onDelete) })}
-                    removeClippedSubviews={true}
                     initialNumToRender={10}
                     maxToRenderPerBatch={8}
-                    windowSize={5} 
+                    windowSize={4}
                 />
             </View>
         </>

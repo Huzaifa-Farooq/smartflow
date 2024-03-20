@@ -15,7 +15,7 @@ const Downloads = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <CustomHeader 
-                title={'Downloads'}
+                title={'My Files'}
                 icon={"keyboard-backspace"}
                 onPress={() => navigation.goBack()}
             />

@@ -4,7 +4,7 @@ import { uploadFiles } from "react-native-fs";
 import { readPpt } from 'react-native-ppt-to-text';
 
 
-axios.defaults.baseURL = 'http://3.111.103.148/';
+axios.defaults.baseURL = 'http://3.111.103.148';
 
 
 export const generateAssignment = ({ title, successCallback, errorCallback }) => {
@@ -26,9 +26,12 @@ export const generateAssignment = ({ title, successCallback, errorCallback }) =>
 }
 
 
-const generateNotesWithFile = async ({ 
+const generateNotesWithFile = async ({
   filePath, fileName, actionCode, progress, successCallback, errorCallback
- }) => {
+}) => {
+  console.log('====================================');
+  console.log('filePath: ', filePath);
+  console.log('====================================');
   const files = [
     {
       name: 'file',
@@ -37,6 +40,8 @@ const generateNotesWithFile = async ({
       filetype: mime.getType(filePath),
     },
   ];
+
+  let lastReportedProgress = 0;
 
   try {
     uploadFiles({
@@ -48,21 +53,18 @@ const generateNotesWithFile = async ({
       },
       progress: (resp) => {
         const p = (resp.totalBytesSent / resp.totalBytesExpectedToSend) * 100;
-        console.log('Progress: ' + p);
-          if (p > 99.0) {
-            progress(100);
-          }
-          else {
-            progress(p);
-          }
+        if (p - lastReportedProgress > 5 || p >= 99) {
+          progress(p);
+          lastReportedProgress = p;
       }
+    }
     })
       .promise.then((response) => {
         // after the file is uploaded, the server will respond with the file url
         successCallback(JSON.parse(response.body));
       })
       .catch((error) => {
-        console.log(error);
+        console.log(JSON.stringify(error));
         errorCallback("Error uploading file.");
       });
   }
@@ -75,7 +77,7 @@ export const generateNotes = async ({
   filePath, fileName, actionCode, progress, successCallback, errorCallback
 }) => {
   try {
-    let pptText = await readPpt(encodeURI(filePath));
+    let pptText = await readPpt(filePath);
     // converting pptText array to string joined by '||||'
     pptText = pptText.join('||||');
     // console.log('pptText: ', pptText);
@@ -108,6 +110,7 @@ const generateNotesWithText = async ({ pptText, fileName, actionCode, successCal
     }
     )
       .then((response) => {
+        console.log(JSON.stringify(response));
         successCallback(response.data);
       })
       .catch((error) => {
@@ -133,14 +136,3 @@ export const checkServerConnection = (onResponse) => {
   console.log('====================================');
 
 }
-
-/*
-
-export AWS_ACCESS_KEY_ID="AKIAWVSHEECG3LXVT7HV"
-export AWS_SECRET_ACCESS_KEY="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"
-export AWS_BUCKET_NAME="xentechnexus"
-export AWS_FILES_ENDPOINT_URL="eu-north-1.amazonaws.com"
-export BARD_API_KEY="AIzaSyC3PG_W1l7nS6uot9FnsToqdA1Ec940j08"
-export OPENAI_API_KEY="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"
-
-*/

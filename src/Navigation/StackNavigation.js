@@ -11,6 +11,7 @@ import PDFMerge from '../Screens/PDFMerge/PDFMerge';
 import Scanner from '../Screens/Scanner/Scanner';
 import FiltersOptionComponent from '../Screens/Scanner/FiltersOptionComponent';
 import ApplyingFiltersComponent from '../Screens/Scanner/ApplyingFiltersComponent';
+import DocViewer from '../Screens/DocViewer/DocViewer';
 
 
 const Stack = createNativeStackNavigator();
@@ -43,6 +44,8 @@ export default class StackNavigation extends React.Component {
           <Stack.Screen name='Assignments' component={Assignment} options={{ headerShown: false }}
           />
           <Stack.Screen name='FeedBack' component={FeedBack} options={{ headerShown: false }}
+          />
+          <Stack.Screen name='DocViewer' component={DocViewer} options={{ headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>
