@@ -1,6 +1,6 @@
 {
   "name": "Smartflow",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -22,6 +22,7 @@
     "react": "^18.2.0",
     "react-native": "0.72.7",
     "react-native-background-fetch": "^4.2.2",
+    "react-native-blob-util": "^0.19.8",
     "react-native-color-matrix-image-filters": "^6.0.7",
     "react-native-document-picker": "^9.1.0",
     "react-native-document-scanner-plugin": "^0.9.1",
