@@ -21,9 +21,17 @@ import { loadFiles } from '../../utils/utils.mjs';
 const loadAndSavePPTDirectoryPaths = async () => {
     const files = await loadFiles({
         directoryPath: RNFS.ExternalStorageDirectoryPath,
-        required_ext: ['.pdf'],
+        required_ext: ['.ppt', '.pptx'],
     });
-    const directoryPaths = files.map(file => file.path.split('/').slice(0, -1).join('/'))
+    const directoryPaths = files.map(file => file.path.split('/').slice(0, -1).join('/'));
+    const defaultDirectories = [
+        RNFS.DownloadDirectoryPath + '/SmartFlow',
+        RNFS.DocumentDirectoryPath,
+        '/storage/emulated/0/WhatsApp/',
+        '/Internal storage/Android/media/com.whatsapp/WhatsApp/',
+        '/Internal storage/Android/media/com.whatsapp'
+    ];
+    directoryPaths.push(...defaultDirectories);
     // removing duplicates from directoryPaths
     const uniqueDirectoryPaths = [...new Set(directoryPaths)];
 
@@ -64,6 +72,8 @@ BackgroundFetch.configure(
 BackgroundFetch.start();
 
 
+
+
 const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
 const Home = ({ navigation }) => {
@@ -90,7 +100,8 @@ const Home = ({ navigation }) => {
             });
 
         RNFS.mkdir(SCANNER_DOCUMENT_PATH);
-        checkServerConnection((val) => { setIsConnected(val) })
+        // checkServerConnection((val) => { setIsConnected(val) })
+        setIsConnected(true);
 
         setTimeout(() => {
             setShowSplash(false);

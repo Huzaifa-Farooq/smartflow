@@ -228,14 +228,13 @@ export default FilesListComponent = ({
                 onChangeText={(text) => setSearch(text)}
                 onClearPress={() => setSearch('')}
                 search={search}
-                viewStyle={{ transform: [{ translateY }] }}
-                searchBarStyle={{ opacity: opacity }}
+                // viewStyle={{ transform: [{ translateY }] }}
+                // searchBarStyle={{ opacity: opacity }}
             />
             {loading && <FileLoadingComponent />}
 
             <View style={animatedFilesListViewStyle}>
                 <Animated.FlatList
-                    style={{ marginTop }}
                     refreshControl={
                         <RefreshControl
                             tintColor="#deb018"

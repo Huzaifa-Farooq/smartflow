@@ -71,6 +71,9 @@ const Notes = ({ navigation }) => {
             fileName: selectedFile.name,
             actionCode: actionCode,
             progress: (progress) => {
+                if (progress > 99){
+                    progress = 100;
+                }
                 setUploadProgress(progress);
             },
             successCallback: handleNotesResponse,
@@ -128,7 +131,7 @@ const Notes = ({ navigation }) => {
                 // Handle download progress updates if needed
                 const val = (progressResponse.bytesWritten / progressResponse.contentLength) * 100;
                 // display progress to user
-                val > downloadProgress ? setDownloadProgress(val) : null;
+                val >= downloadProgress ? setDownloadProgress(val) : null;
                 console.log(`Download progress val: ${val}%`);
             },
         })
@@ -175,6 +178,14 @@ const Notes = ({ navigation }) => {
                 console.log('Error getting PPTDirectoryPaths ' + e);
             });
     };
+
+
+    console.log(
+        'uploadProgress: ', uploadProgress,
+        'downloadProgress: ', downloadProgress,
+        'requestInProgress: ', requestInProgress,
+
+    )
 
     // if loading is true and and files are found, then show loading indicator below the files
     // if loading is false and files are found, then show files without loading indicator
