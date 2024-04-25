@@ -164,8 +164,14 @@ export default FilesListComponent = ({
                 required_ext: required_ext
             });
         }));
+        // removing duplicated items with path key
         setResult(sortFilesArray({
-            files: results.flat(),
+            // flattening and removing duplicates (if any)
+            files: results.flat().filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.path === item.path
+                ))
+            ),
             sortBy: 'date',
             reversed: true
         }));
@@ -228,8 +234,8 @@ export default FilesListComponent = ({
                 onChangeText={(text) => setSearch(text)}
                 onClearPress={() => setSearch('')}
                 search={search}
-                // viewStyle={{ transform: [{ translateY }] }}
-                // searchBarStyle={{ opacity: opacity }}
+            // viewStyle={{ transform: [{ translateY }] }}
+            // searchBarStyle={{ opacity: opacity }}
             />
             {loading && <FileLoadingComponent />}
 

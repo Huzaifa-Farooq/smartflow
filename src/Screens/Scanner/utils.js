@@ -1,6 +1,7 @@
 import { PDFDocument } from 'pdf-lib';
 import RNFetchBlob from 'rn-fetch-blob';
 import { Buffer } from 'buffer';
+import { Image } from 'react-native-compressor';
 
 
 export const createImagesPDF = async ({
@@ -30,8 +31,11 @@ export const createImagesPDF = async ({
     for (let chunk of chunks) {
         await Promise.all(chunk.map(async (image) => {
             console.log('Processing image: ' + image);
-            const filename = image.split('/').pop();
             const page = pdf.addPage();
+            image = await Image.compress(image);
+
+            const filename = image.split('/').pop();
+            const ext = filename.split('.').pop();
 
             const imageBytes = await RNFetchBlob.fs.readFile(image, 'base64');
             let pdfImage;

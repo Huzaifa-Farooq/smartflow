@@ -86,7 +86,8 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
                     console.log('Created file');
                     setPdfInProgress(false);
                     navigation.navigate('Scanner', { refresh: true });
-                    FileViewer.open(outputFilePath, { showOpenWithDialog: true });
+                    // navigate to DocViewer
+                    navigation.navigate('DocViewer', { path: outputFilePath, name: outputFilePath.split('/').pop() })
                 },
                 errorCallback: (error) => {
                     setPdfInProgress(false)

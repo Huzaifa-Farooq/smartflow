@@ -15,7 +15,6 @@ export default DocViewer = ({ navigation, route }) => {
     const [currentPage, setCurrentPage] = useState(0);
 
     console.log("File path " + path);  // Access filePath for debugging
-    console.log(typeof (path))
     return (
         <View style={{ flex: 1 }}>
             <SubScreenHeader
@@ -41,11 +40,7 @@ export default DocViewer = ({ navigation, route }) => {
                 icon={"keyboard-backspace"}
                 onPress={() => navigation.goBack()}
             />
-            <View
-                style={{
-                    flex: 1, height: height * 0.8, width: width
-                }}
-            >
+            <View style={{ flex: 1, padding: 5, }}>
                 <Pdf
                     source={{ uri: path, cache: true }}
                     onLoadComplete={(numberOfPages) => {
@@ -54,7 +49,6 @@ export default DocViewer = ({ navigation, route }) => {
                     }}
                     onPageChanged={(page) => {
                         setCurrentPage(page);
-                        console.log(`Current page: ${page}`);
                     }}
                     onError={(error) => {
                         console.log(error); // Log errors for debugging
@@ -73,7 +67,7 @@ export default DocViewer = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
     pdf: {
-        width: width * 1,
-        height: height * 0.82,
+        width: (width * 1) - 10,
+        height: (height * 0.82) - 10,
     },
 });

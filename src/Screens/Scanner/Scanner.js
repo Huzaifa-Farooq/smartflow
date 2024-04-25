@@ -51,6 +51,7 @@ export default Scanner = ({ router, navigation }) => {
     });
 
     if (status == 'success' && scannedImages && scannedImages.length > 0) {
+      
       navigation.navigate('FilterSelectOption', { scannedImagesList: scannedImages });
     }
   }
