@@ -2,27 +2,31 @@ import axios from 'axios';
 import * as mime from 'mime';
 import { uploadFiles } from "react-native-fs";
 import { readPpt } from 'react-native-ppt-to-text';
+import RNFetchBlob from 'rn-fetch-blob';
+import RNFS from 'react-native-fs';
+import { err } from 'react-native-svg';
 
 
-axios.defaults.baseURL = 'http://3.111.103.148';
+axios.defaults.baseURL = 'http://172.0.7.151:8001';
 
 
 export const generateAssignment = ({ title, successCallback, errorCallback }) => {
-  axios.post(
-    `/generate_assignment`,
-    {},
-    {
-      params: { title: title },
-      headers: { 'Content-Type': 'application/json' }
-    }
-  )
-    .then((response) => {
-      console.log(response);
-      successCallback(response.data);
-    })
-    .catch((error) => {
-      errorCallback('Error while generating assignment.');
-    });
+    RNFetchBlob.fetch(
+      'POST', 
+      `${axios.defaults.baseURL}/generate_assignment?title=${title}`, {})
+      .then((response) => {
+        if (response.respInfo.headers['content-disposition'].includes('filename=')){
+          const filename = response.respInfo.headers['content-disposition'].split('filename=')[1];
+          const base64 = response.base64();
+          successCallback({ filename, base64 });
+        } else {
+          errorCallback(response.json().content.message);
+        }
+      })
+      .catch((errorMessage, statusCode) => {
+        console.log('Error fetching file ' + errorMessage);
+        errorCallback('Error while generating assignment.');
+      });
 }
 
 
@@ -122,6 +126,37 @@ const generateNotesWithText = async ({ pptText, fileName, actionCode, successCal
     errorCallback('Error while generating notes.');
   }
 }
+
+
+export const generatePresentation = ({ title, templateId, successCallback, errorCallback }) => {
+  RNFetchBlob.fetch(
+    'POST', 
+    `${axios.defaults.baseURL}/generate_presentation?title=${title}&template_id=${templateId}`, {})
+    .then((response) => {
+      const filename = response.respInfo.headers['content-disposition'].split('filename=')[1];
+      const base64 = response.base64();
+      successCallback({ filename, base64 });
+    })
+    .catch((errorMessage, statusCode) => {
+      console.log('Error fetching file ' + errorMessage);
+      errorCallback('Error while generating presentation.');
+    });
+}
+
+
+export const getTemplates = ({ successCallback, errorCallback }) => {
+  axios.get('templates', {
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+    .then((response) => {
+      successCallback(response.data);
+    })
+    .catch((error) => {
+      errorCallback(error.message);
+    });
+  }
 
 
 export const checkServerConnection = (onResponse) => {

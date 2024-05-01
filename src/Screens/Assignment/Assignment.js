@@ -14,7 +14,6 @@ import ErrorDialog from '../../Components/ErrorDialog';
 import AnimatedIcon from '../../Components/AnimatedIcon';
 
 
-
 // create a component
 const Assignment = ({ navigation }) => {
     const [topic, setTopic] = useState('');
@@ -24,40 +23,13 @@ const Assignment = ({ navigation }) => {
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState(null);
 
+    const ASSIGNMENT_FOLDER = RNFS.DownloadDirectoryPath + '/SmartFlow/Assignments';
+    RNFS.mkdir(ASSIGNMENT_FOLDER)
+
+
     const Fileopener = (path) => {
         FileViewer.open(path, { showOpenWithDialog: true })
     };
-
-    const handleResponse = (response) => {
-        console.log('response received')
-        setRequestInProgress(false);
-        // random number between 1 - 10
-        const randomNumber = Math.floor(Math.random() * 10) + 1;
-        setDownloadProgress(randomNumber);
-
-        if (response.file_url) {
-            console.log('Downloading file...')
-            downloadFile({
-                fileUrl: response.file_url,
-                fileName: response.filename,
-            });
-        }
-        else {
-            console.log('No file to download')
-            console.log(JSON.stringify(response))
-            setError(response.message);
-        }
-
-        setGenerateButtonDisabled(false);
-    }
-
-    const handleError = (err) => {
-        console.log('error while generating assignment');
-        console.log("error is: " + err);
-        setError(err);
-        setRequestInProgress(false);
-        setGenerateButtonDisabled(false);
-    }
 
     const handleAssignmentInput = () => {
         // disable the button and let the user know that the request is being processed
@@ -70,51 +42,31 @@ const Assignment = ({ navigation }) => {
 
         generateAssignment({
             title: topic,
-            successCallback: handleResponse,
-            errorCallback: (err) => handleError(err.message)
+            successCallback: ({ base64, filename }) => {
+                const path = `${ASSIGNMENT_FOLDER}/${filename}`;
+                console.log('Writing file');
+                RNFS.writeFile(path, base64, 'base64')
+                    .then(() => {
+                        console.log('File written to ', path);
+                        setDownloadedFile({ name: filename, path, size: base64.length });
+                    })
+                    .catch((err) => {
+                        console.log(err.message);
+                        setError('Error while creating file.');
+                        setDownloadedFile(null);
+                    });
+                setRequestInProgress(false);
+            },
+            errorCallback: (error) => {
+                console.log(error);
+                setError('Error while generating presentation.');
+                setRequestInProgress(false);
+                setGenerateButtonDisabled(false);
+            }
         });
     }
 
-    const downloadFile = ({ fileUrl, fileName }) => {
-        setGenerateButtonDisabled(true);
-        const filePath = RNFS.DownloadDirectoryPath + '/SmartFlow/' + fileName;
-        console.log('Downloading file to ' + filePath);
-
-        RNFS.downloadFile({
-            fromUrl: fileUrl,
-            toFile: filePath,
-            background: true, // Enable downloading in the background (iOS only)
-            discretionary: true, // Allow the OS to control the timing and speed (iOS only)
-            progress: (progressResponse) => {
-                // Handle download progress updates if needed
-                const progress = (progressResponse.bytesWritten / progressResponse.contentLength) * 100;
-                // display progress to user
-                setDownloadProgress(progress);
-            },
-        })
-            .promise.then((response) => {
-                console.log('File downloaded!', response);
-                setDownloadProgress(100);
-                setDownloadedFile({
-                    size: response.bytesWritten,
-                    name: fileName,
-                    path: filePath
-                });
-            })
-            .catch((err) => {
-                console.log('Download error:', err);
-                // display error to user
-                setError('Error downloading file. Please check your internet connection.');
-                // resetting downloading progress
-                setDownloadProgress(0);
-
-            });
-
-        setGenerateButtonDisabled(false);
-    };
-
     const buttonDisabled = topic === '' || generateButtonDisabled;
-
 
     // request is not sent yet
     return (
@@ -136,7 +88,6 @@ const Assignment = ({ navigation }) => {
                 />
             </View>
 
-
             {
                 requestInProgress && (
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -147,17 +98,7 @@ const Assignment = ({ navigation }) => {
             }
 
             {
-                (downloadProgress > 0 && !downloadedFile) && (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <AnimatedIcon name='fileDownload' style={{ width: 150, height: 150 }} />
-                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: 'black' }}>Downloading file...</Text>
-                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: 'black' }}>{downloadProgress.toFixed(2)}%</Text>
-                    </View>
-                )
-            }
-
-            {
-                downloadedFile && downloadProgress == 100 && (
+                downloadedFile && (
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <TouchableHighlight
                             underlayColor={''}

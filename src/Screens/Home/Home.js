@@ -11,11 +11,12 @@ import Banner from '../../Components/BannersAd/Banner';
 import SplashScreen from '../SplashScreen/SplashScreen';
 
 import ErrorDialog from '../../Components/ErrorDialog';
-import { checkServerConnection } from '../../api/api.mjs';
+import { checkServerConnection, generatePresentation } from '../../api/api.mjs';
 
 import BackgroundFetch from "react-native-background-fetch";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadFiles } from '../../utils/utils.mjs';
+
 
 
 const loadAndSavePPTDirectoryPaths = async () => {
@@ -180,14 +181,15 @@ const Home = ({ navigation }) => {
                     marginTop: 20
                 }}>
                     <HomeCard txt={'Notes'}
-                        iconName='book-open-page-variant-outline'
+                        imageSource={require('../../assets/Images/Notes.png')}
                         iconColor={'#09C3B6'}
                         iconBackgroundColor={"#bfe0dd"}
                         onPress={() => handleNavigation("Notes")}
                         topRightIconName={isConnected ? null : 'wifi-off'}
                     />
                     <HomeCard txt={'Assignments'}
-                        iconName='bookmark-multiple-outline'
+                        // iconName='bookmark-multiple-outline'
+                        imageSource={require('../../assets/Images/Assignment.png')}
                         iconColor={'#0BDA0B'}
                         iconBackgroundColor={"#c9f2ca"}
                         onPress={() => handleNavigation("Assignments")}
@@ -200,8 +202,8 @@ const Home = ({ navigation }) => {
                     marginTop: 20
                 }}>
                     <HomeCard txt={'PDF Merger'}
-                        iconName='file-document-multiple'
-                        iconColor={'#E60FB7'}
+                        imageSource={require('../../assets/Images/PdfMerge.png')}
+                        iconColor={'#PdfMerge60FB7'}
                         iconBackgroundColor={"#E2D0DE"}
                         onPress={() => { navigation.navigate("PDFMerge") }}
                     />
@@ -214,8 +216,18 @@ const Home = ({ navigation }) => {
                         onPress={() => navigation.navigate("Scanner")}
                     />
                 </View>
-                <View >
-                    <HomeCardTwo txt={'My Files'}
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    marginTop: 20
+                }}>
+                    <HomeCard txt={'Presentation'}
+                        imageSource={require('../../assets/Images/Presentation.png')}
+                        iconColor={'#E28C20'}
+                        iconBackgroundColor={"#ebeda8"}
+                        onPress={() => navigation.navigate("Templates")}
+                        />
+                    <HomeCard txt={'My Files'}
                         iconName='file-document'
                         iconColor={'#E28C20'}
                         iconBackgroundColor={"#ebeda8"}

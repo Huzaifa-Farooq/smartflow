@@ -12,6 +12,8 @@ import Scanner from '../Screens/Scanner/Scanner';
 import FiltersOptionComponent from '../Screens/Scanner/FiltersOptionComponent';
 import ApplyingFiltersComponent from '../Screens/Scanner/ApplyingFiltersComponent';
 import DocViewer from '../Screens/DocViewer/DocViewer';
+import Presentation from '../Screens/Presentation/Presentation';
+import Templates from '../Screens/Presentation/Templates';
 
 
 const Stack = createNativeStackNavigator();
@@ -45,7 +47,11 @@ export default class StackNavigation extends React.Component {
           />
           <Stack.Screen name='FeedBack' component={FeedBack} options={{ headerShown: false }}
           />
-          <Stack.Screen name='DocViewer' component={DocViewer} options={{ headerShown: false }}
+          <Stack.Screen name='DocViewer' component={DocViewer} options={{ headerShown: false }} 
+          />
+          <Stack.Screen name='Presentation' component={Presentation} options={{ headerShown: false }}
+          />
+          <Stack.Screen name='Templates' component={Templates} options={{ headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>
