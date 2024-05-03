@@ -13,9 +13,6 @@ import {
 
 
 export const GrayscaledImage = ({ imageSource, style, onExtractImage }) => {
-    console.log('====================================');
-    console.log('style ', JSON.stringify(style));
-    console.log('====================================');
     return (
         <Grayscale
             onExtractImage={onExtractImage}
@@ -106,15 +103,15 @@ const lightenImage = ({ imageSource, style, onExtractImage }) => (
 
 
 const Filters = {
-    'Text Magic': CombinedFiltersImage,
     'Original': defaultImage,
-    'Grayscale': GrayscaledImage,
-    'Sharpen': sharpenImage,
-    'High Contrast': HighContrastImage,
-    'Inverted': InvertedImage,
-    'Saturated': SaturatedImage,
-    'SepiaTinted': SepiaTintedImage,
-    'Lighten': lightenImage
+    // 'Text Magic': CombinedFiltersImage,
+    // 'Grayscale': GrayscaledImage,
+    // 'Sharpen': sharpenImage,
+    // 'High Contrast': HighContrastImage,
+    // 'Inverted': InvertedImage,
+    // 'Saturated': SaturatedImage,
+    // 'SepiaTinted': SepiaTintedImage,
+    // 'Lighten': lightenImage
 };
 
 export const Filter = ({ filterName, imageSource, style, onExtractImage }) => {

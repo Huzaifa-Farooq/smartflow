@@ -12,6 +12,7 @@ import { DocumentItem } from '../../Components/DocumentItem';
 import { getFileIcon, formatSize } from '../../utils/utils.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
 import AnimatedIcon from '../../Components/AnimatedIcon';
+import AssignmentsOptionModal from '../../Components/AssignmentOptionModel';
 
 
 // create a component
@@ -22,6 +23,7 @@ const Assignment = ({ navigation }) => {
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState(null);
+    const [displayModal, setDisplayModal] = useState(false);
 
     const ASSIGNMENT_FOLDER = RNFS.DownloadDirectoryPath + '/SmartFlow/Assignments';
     RNFS.mkdir(ASSIGNMENT_FOLDER)
@@ -31,9 +33,10 @@ const Assignment = ({ navigation }) => {
         FileViewer.open(path, { showOpenWithDialog: true })
     };
 
-    const handleAssignmentInput = () => {
+    const handleAssignmentInput = (mode) => {
         // disable the button and let the user know that the request is being processed
         console.log('Generating assignment...');
+        setDisplayModal(false);
         setGenerateButtonDisabled(true);
         setRequestInProgress(true);
         setDownloadProgress(0);
@@ -42,6 +45,7 @@ const Assignment = ({ navigation }) => {
 
         generateAssignment({
             title: topic,
+            mode: mode,
             successCallback: ({ base64, filename }) => {
                 const path = `${ASSIGNMENT_FOLDER}/${filename}`;
                 console.log('Writing file');
@@ -59,7 +63,7 @@ const Assignment = ({ navigation }) => {
             },
             errorCallback: (error) => {
                 console.log(error);
-                setError('Error while generating presentation.');
+                setError('Error while generating Assignment.');
                 setRequestInProgress(false);
                 setGenerateButtonDisabled(false);
             }
@@ -111,6 +115,15 @@ const Assignment = ({ navigation }) => {
             }
 
             {
+                displayModal && (
+                    <AssignmentsOptionModal
+                        onClose={() => setDisplayModal(false)}
+                        onPress={handleAssignmentInput}
+                    />
+                )
+            }
+
+            {
                 (error) && (
                     <ErrorDialog
                         error={error}
@@ -122,7 +135,7 @@ const Assignment = ({ navigation }) => {
             <View style={{ flex: 1 }}>
                 <TouchableOpacity
                     style={[buttonDisabled ? styles.button1 : styles.button]}
-                    onPress={handleAssignmentInput}
+                    onPress={() => { setDisplayModal(true); }}
                     disabled={topic === ''}
                 >
                     <Text style={styles.btnText}>Generate</Text>

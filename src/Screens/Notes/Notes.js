@@ -28,7 +28,6 @@ const Notes = ({ navigation }) => {
     const [displayModal, setDisplayModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState({});
     const [uploadProgress, setUploadProgress] = useState(0);
-    const [downloadProgress, setDownloadProgress] = useState(0);
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState();
@@ -62,7 +61,6 @@ const Notes = ({ navigation }) => {
         console.log('Selected file: ', selectedFile);
         setDisplayModal(false);
         setRequestInProgress(true);
-        setDownloadProgress(0);
         setDownloadedFile(null);
         setError(null);
 
@@ -90,72 +88,32 @@ const Notes = ({ navigation }) => {
                 setDisplayModal(false);
                 setUploadProgress(0);
                 setRequestInProgress(false);
-                setDownloadProgress(0);
                 setDownloadedFile(null);
             }
         });
     }
 
-    const handleNotesResponse = (response) => {
-        console.log(response);
+    const handleNotesResponse = async ({ filename, base64 }) => {
+        console.log('Handling response');
         setRequestInProgress(false);
-        if (response.pdf_url) {
-            console.log('Downloading file...')
-            downloadFile({
-                fileUrl: response.pdf_url,
-                fileName: response.filename,
-            });
-        }
-        else {
-            console.log('No file to download')
-            setError('No file to download');
-        }
-    }
-
-    const downloadFile = async ({ fileUrl, fileName }) => {
-        const directory = RNFS.DownloadDirectoryPath + '/SmartFlow';
-        fileName = await getFileName(directory, fileName);
-        const filePath = directory + "/" + fileName;
-        console.log('Downloading file' + fileUrl + ' to ' + filePath);
-
-        // random number from 1 - 10
-        const randomNumber = Math.floor(Math.random() * 10) + 1;
-        setDownloadProgress(randomNumber);
-
-        RNFS.downloadFile({
-            fromUrl: fileUrl,
-            toFile: filePath,
-            background: true, // Enable downloading in the background (iOS only)
-            discretionary: true, // Allow the OS to control the timing and speed (iOS only)
-            progress: (progressResponse) => {
-                // Handle download progress updates if needed
-                const val = (progressResponse.bytesWritten / progressResponse.contentLength) * 100;
-                // display progress to user
-                val >= downloadProgress ? setDownloadProgress(val) : null;
-                console.log(`Download progress val: ${val}%`);
-            },
-        })
-            .promise.then((response) => {
-                console.log('====================================');
-                console.log('File downloaded!', response);
-                console.log({
-                    size: response.bytesWritten,
-                    name: fileName,
-                    path: filePath
-                });
-                console.log('====================================');
-                setDownloadProgress(100);
+        setUploadProgress(100);
+        const directory = RNFS.DownloadDirectoryPath + '/SmartFlow/';
+        filename = await getFileName(directory, filename);
+        const filePath = directory + filename;
+        console.log('Writing file to disk.');
+        RNFS.writeFile(filePath, base64, 'base64')
+            .then(() => {
+                console.log('File written!');
                 setDownloadedFile({
-                    size: response.bytesWritten,
-                    name: fileName,
+                    size: base64.length,
+                    name: filename,
                     path: filePath
                 });
             })
             .catch((err) => {
-                console.log('Download error:', err);
-                // display error to user
+                console.log('Error writing file', err);
             });
-    };
+    }
 
     const Header = useMemo(() => {
         return (
@@ -179,13 +137,6 @@ const Notes = ({ navigation }) => {
             });
     };
 
-
-    console.log(
-        'uploadProgress: ', uploadProgress,
-        'downloadProgress: ', downloadProgress,
-        'requestInProgress: ', requestInProgress,
-
-    )
 
     // if loading is true and and files are found, then show loading indicator below the files
     // if loading is false and files are found, then show files without loading indicator
@@ -221,24 +172,20 @@ const Notes = ({ navigation }) => {
                 <NotesProgressModal
                     uploadProgress={uploadProgress}
                     uploadInProgress={uploadProgress > 0 && uploadProgress < 100}
-                    downloadProgress={downloadProgress}
-                    fileDownloadInProgress={downloadProgress > 0 && downloadProgress < 100}
+                    downloadProgress={0}
+                    fileDownloadInProgress={false}
                     notesGenerationInProgress={
                         requestInProgress &&
-                        (uploadProgress == 0 || uploadProgress == 100) &&
-                        (downloadProgress == 0 || downloadProgress == 100)
+                        (uploadProgress == 0 || uploadProgress == 100)
                     }
                 />
             }
 
             {
-                downloadedFile && downloadProgress == 100 && (
+                downloadedFile && (
                     <NotesOutputComponent
                         downloadedFile={downloadedFile}
-                        onPress={() => { navigation.navigate('DocViewer', {     
-                            path: downloadedFile.path, 
-                            name: downloadedFile.name
-                        }) }}
+                        onPress={() => { Fileopener(downloadedFile.path) }}
                         onClose={() => setDownloadedFile(null)}
                     />
                 )

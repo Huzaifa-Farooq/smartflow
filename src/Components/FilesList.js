@@ -6,10 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 
-
 import { StyleSheet, } from 'react-native';
-import { CustomHeader } from './CustomHeader';
-import RNFS from 'react-native-fs'
 import FileViewer from "react-native-file-viewer";
 import { DocumentItem } from './DocumentItem';
 import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../utils/utils.mjs';
@@ -117,25 +114,6 @@ export default FilesListComponent = ({
     const [loading, setLoading] = useState(true);
 
     const scrollY = useRef(new Animated.Value(0)).current;
-    const diffClamp = Animated.diffClamp(scrollY, 0, 100);
-
-    const translateY = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -60],
-        extrapolate: 'clamp',
-    });
-
-    const opacity = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-    });
-
-    const marginTop = diffClamp.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -30],
-        extrapolate: 'clamp',
-    });
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -208,6 +186,7 @@ export default FilesListComponent = ({
                         iconSrc={getFileIcon(item.name)}
                         title={item.name}
                         size={formatSize(item.size)}
+                        filePath={item.path}
                     />
                 </TouchableHighlight>
             )
@@ -269,14 +248,16 @@ export default FilesListComponent = ({
 };
 
 
-const onShare = async (filePath) => {
+export const onShare = async (filePath) => {
+    filePath = filePath.replace(' ', '%20');
     const options = {
         title: 'Share',
         message: 'Sent via Smartflow',
-        url: `file://${encodeURIComponent(filePath)}`
+        url: `file://${filePath}`
     };
     try {
         const result = await Share.open(options);
+        console.log(`Result: ${JSON.stringify(result)}`);
     } catch (error) {
         console.log(error);
     }

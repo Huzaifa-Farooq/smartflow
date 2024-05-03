@@ -10,7 +10,7 @@ import SubScreenHeader from '../../Components/SubScreenHeader';
 const { height, width } = Dimensions.get('window');
 
 
-DEFAULT_FILTER = 'Text Magic';
+DEFAULT_FILTER = 'Original';
 
 
 export default FiltersOptionComponent = ({ route, navigation }) => {

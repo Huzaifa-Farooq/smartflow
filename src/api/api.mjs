@@ -2,18 +2,18 @@ import axios from 'axios';
 import * as mime from 'mime';
 import { uploadFiles } from "react-native-fs";
 import { readPpt } from 'react-native-ppt-to-text';
+import { Buffer } from 'buffer';
 import RNFetchBlob from 'rn-fetch-blob';
-import RNFS from 'react-native-fs';
-import { err } from 'react-native-svg';
 
 
-axios.defaults.baseURL = 'http://172.0.7.151:8001';
+axios.defaults.baseURL = 'http://192.168.10.9:8001';
 
 
-export const generateAssignment = ({ title, successCallback, errorCallback }) => {
+export const generateAssignment = ({ title, mode, successCallback, errorCallback }) => {
     RNFetchBlob.fetch(
       'POST', 
-      `${axios.defaults.baseURL}/generate_assignment?title=${title}`, {})
+      `${axios.defaults.baseURL}/generate_assignment?title=${title}&mode=${mode}`, {
+      })
       .then((response) => {
         if (response.respInfo.headers['content-disposition'].includes('filename=')){
           const filename = response.respInfo.headers['content-disposition'].split('filename=')[1];
@@ -57,15 +57,19 @@ const generateNotesWithFile = async ({
       },
       progress: (resp) => {
         const p = (resp.totalBytesSent / resp.totalBytesExpectedToSend) * 100;
-        if (p - lastReportedProgress > 5 || p >= 99) {
+        if (p - lastReportedProgress > 10 || p >= 99) {
           progress(p);
           lastReportedProgress = p;
       }
     }
     })
       .promise.then((response) => {
-        // after the file is uploaded, the server will respond with the file url
-        successCallback(JSON.parse(response.body));
+        console.log(typeof response.body)
+        // The server will respond with bytes of the file
+        const headers = response.headers;
+        const filename = headers['content-disposition'].split('filename=')[1];
+        const base64 = response.body;
+        successCallback({ filename, base64 });
       })
       .catch((error) => {
         console.log(JSON.stringify(error));
@@ -114,8 +118,11 @@ const generateNotesWithText = async ({ pptText, fileName, actionCode, successCal
     }
     )
       .then((response) => {
-        console.log(JSON.stringify(response));
-        successCallback(response.data);
+        // The server will respond with bytes of the file
+        const headers = response.respInfo.headers;
+        const filename = headers['content-disposition'].split('filename=')[1];
+        const base64 = response.base64();
+        successCallback({ filename, base64 });
       })
       .catch((error) => {
         console.log(error);
@@ -154,6 +161,9 @@ export const getTemplates = ({ successCallback, errorCallback }) => {
       successCallback(response.data);
     })
     .catch((error) => {
+      console.log('====================================');
+      console.log('error while getting templates: ' + error);
+      console.log('====================================');
       errorCallback(error.message);
     });
   }

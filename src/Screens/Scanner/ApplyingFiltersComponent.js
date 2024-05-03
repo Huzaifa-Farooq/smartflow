@@ -73,11 +73,11 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
             const outputFilePath = SCANNER_DOCUMENT_PATH + '/' + fileName + '.pdf';
 
             // printing size of each file im MBs
-            images.forEach((image) => {
-                RNFS.stat(image).then((stats) => {
-                    console.log('File size: ' + stats.size / (1024 * 1024) + ' MB');
-                });
-            });
+            // images.forEach((image) => {
+            //     RNFS.stat(image).then((stats) => {
+            //         console.log('File size: ' + stats.size / (1024 * 1024) + ' MB');
+            //     });
+            // });
 
             createImagesPDF({
                 images: images,
@@ -110,6 +110,21 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
     };
 
     const onExtractImage = ({ srcURI, dstURI }) => {
+        // saving both srcURI and dstURI images to Downloads directory
+        const srcPath = `${RNFS.DownloadDirectoryPath}/${srcURI.split('/').pop()}`;
+        const dstPath = `${RNFS.DownloadDirectoryPath}/${dstURI.split('/').pop()}`;
+
+        RNFS.copyFile(srcURI, srcPath).then(() => {
+            console.log('Copied image', srcURI, ' at: ' + srcPath);
+        }).catch((error) => {
+            console.log('Error copying image', srcURI, ' at: ' + srcPath, error);
+        });
+        RNFS.copyFile(dstURI, dstPath).then(() => {
+            console.log('Copied image', dstURI, ' at: ' + dstPath);
+        }).catch((error) => {
+            console.log('Error copying image', dstURI, ' at: ' + dstPath, error);
+        });
+
         console.log('Extracted image', srcURI, ' at: ' + dstURI);
         setFilteredImages([...filteredImages, [srcURI, dstURI]]);
     }

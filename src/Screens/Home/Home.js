@@ -207,7 +207,19 @@ const Home = ({ navigation }) => {
                         iconBackgroundColor={"#E2D0DE"}
                         onPress={() => { navigation.navigate("PDFMerge") }}
                     />
+                    <HomeCard txt={'Presentation'}
+                        imageSource={require('../../assets/Images/Presentation.png')}
+                        iconColor={'#E28C20'}
+                        iconBackgroundColor={"#F8BBD0"}
+                        onPress={() => navigation.navigate("Templates")}
+                        />
 
+                </View>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    marginTop: 20
+                }}>
                     <HomeCard txt={'Scanner'}
                         // iconName='camera-document'
                         imageSource={require('../../assets/Images/Scanning.png')}
@@ -215,18 +227,6 @@ const Home = ({ navigation }) => {
                         iconBackgroundColor={"#CDCEE0"}
                         onPress={() => navigation.navigate("Scanner")}
                     />
-                </View>
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    marginTop: 20
-                }}>
-                    <HomeCard txt={'Presentation'}
-                        imageSource={require('../../assets/Images/Presentation.png')}
-                        iconColor={'#E28C20'}
-                        iconBackgroundColor={"#ebeda8"}
-                        onPress={() => navigation.navigate("Templates")}
-                        />
                     <HomeCard txt={'My Files'}
                         iconName='file-document'
                         iconColor={'#E28C20'}
