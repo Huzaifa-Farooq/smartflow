@@ -13,6 +13,7 @@ const pathMap = {
     'wait': require('../assets/animations/wait.json'),
     // 'loading': require('../assets/animations/loading.json'),
     'success': require('../assets/animations/success.json'),
+    'presentation': require('../assets/animations/presentation.json'),
 };
 
 

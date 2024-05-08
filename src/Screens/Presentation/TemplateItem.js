@@ -1,13 +1,15 @@
-
 import { StyleSheet, Image, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import React from 'react';
-
 
 const { height, width } = Dimensions.get('window');
 
 const TemplateItem = ({ imageSource, txt, iconBackgroundColor, onPress }) => {
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.container, { backgroundColor: iconBackgroundColor }]}>
+        <TouchableOpacity 
+            onPress={onPress} 
+            underlayColor={''}
+            style={[styles.container, { backgroundColor: iconBackgroundColor }]}
+            >
             <View style={styles.iconContainer}>
                 <Image 
                     source={{ uri: imageSource }}
@@ -30,13 +32,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         height: height / 5.4,
         width: width / 2.19,
-        backgroundColor: '#fff',
-        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 10,
         elevation: 3,
         marginBottom: 10,
         marginTop: 10,
-        marginHorizontal: 3
-
+        marginHorizontal: 3,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
     iconContainer: {
         position: 'absolute',
@@ -44,10 +52,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 15,
-        // borderColor:'black',
         padding: 2,
         elevation: 3
-
     },
     textContainer: {
         position: 'absolute',
@@ -57,14 +63,12 @@ const styles = StyleSheet.create({
         width: width / 3,
         alignItems: 'center',
         justifyContent: 'center',
-
     },
     text: {
-        fontSize: 20,
+        fontSize: 18,
         color: '#000',
         fontFamily: 'ProximaNova-Regular',
         marginTop: 5
-
     },
     topRightIconContainer: {
         position: 'absolute',

@@ -49,7 +49,7 @@ const Presentation = ({ route, navigation }) => {
     const handleAssignmentInput = () => {
         setRequestInProgress(true);
         generatePresentation({
-            title: topic,
+            title: topic.strip(),
             templateId: templateId,
             successCallback: ({ base64, filename }) => {
                 const path = `${PRESENTATION_FOLDER}/${filename}`;
@@ -98,7 +98,7 @@ const Presentation = ({ route, navigation }) => {
             {
                 requestInProgress && (
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <AnimatedIcon name='writeOnPage' style={{ width: 200, height: 200, flex: 1 }} />
+                        <AnimatedIcon name='presentation' style={{ width: 200, height: 200, flex: 1 }} />
                         <Text style={{ fontSize: 20, fontWeight: 'bold', ...styles.textColor }}>Generating Presentation...</Text>
                     </View>
                 )

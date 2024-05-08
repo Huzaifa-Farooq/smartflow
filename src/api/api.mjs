@@ -6,7 +6,7 @@ import { Buffer } from 'buffer';
 import RNFetchBlob from 'rn-fetch-blob';
 
 
-axios.defaults.baseURL = 'http://192.168.10.9:8001';
+axios.defaults.baseURL = 'https://smartflow3-tb3z2n5h.b4a.run/';
 
 
 export const generateAssignment = ({ title, mode, successCallback, errorCallback }) => {
