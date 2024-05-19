@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, } from 'react-native';
 import Banner from '../../Components/BannersAd/Banner';
 import Filters, { Filter } from './Filters';
@@ -18,6 +18,13 @@ export default FiltersOptionComponent = ({ route, navigation }) => {
 
     const imageSource = { uri: scannedImagesList[0] };
     const [selectedFilter, setSelectedFilter] = useState(DEFAULT_FILTER);
+
+    useEffect(() => {
+        navigation.navigate('ApplyFilters',
+            { filterName: selectedFilter, scannedImagesList: scannedImagesList }
+        )
+    });
+
 
     return (
         <View style={styles.container}>
@@ -47,7 +54,7 @@ export default FiltersOptionComponent = ({ route, navigation }) => {
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        
+
                         style={styles.scrollView}
                     >
                         {
@@ -106,8 +113,8 @@ const styles = StyleSheet.create({
         paddingLeft: 8,
         paddingRight: 18,
         backgroundColor: '#f2f2f2',
-        borderRadius: 10, 
-        elevation: 5, 
+        borderRadius: 10,
+        elevation: 5,
         shadowColor: '#000',
         shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 0.3,

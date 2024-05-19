@@ -49,7 +49,7 @@ const Presentation = ({ route, navigation }) => {
     const handleAssignmentInput = () => {
         setRequestInProgress(true);
         generatePresentation({
-            title: topic.strip(),
+            title: topic.trim(),
             templateId: templateId,
             successCallback: ({ base64, filename }) => {
                 const path = `${PRESENTATION_FOLDER}/${filename}`;
@@ -99,7 +99,7 @@ const Presentation = ({ route, navigation }) => {
                 requestInProgress && (
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <AnimatedIcon name='presentation' style={{ width: 200, height: 200, flex: 1 }} />
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', ...styles.textColor }}>Generating Presentation...</Text>
+                        <Text style={{ color: 'black' ,fontSize: 20, fontWeight: 'bold', ...styles.textColor }}>Generating Presentation...</Text>
                     </View>
                 )
             }
@@ -129,7 +129,6 @@ const Presentation = ({ route, navigation }) => {
             <TouchableOpacity
                 style={[topic === '' || requestInProgress ? styles.button : styles.button1]}
                 onPress={() => {
-                    setTopic('');
                     handleAssignmentInput();
                 }}
                 disabled={topic === '' || requestInProgress}
@@ -152,13 +151,14 @@ const styles = StyleSheet.create({
     },
     textInput: {
         borderWidth: 1,
+        borderColor: '#ddd', // border
         width: '90%',
         alignSelf: 'center',
         borderRadius: 10,
         marginTop: 20,
-        padding: 20,
-        color: '#777777'
-
+        padding: 10,
+        backgroundColor: '#f9f9f9',
+        color: 'black'
     },
     text: {
         color: '#777777',

@@ -39,7 +39,7 @@ export const DocumentItem = ({ iconSrc, title, filePath, size, selected, selecte
                     <TouchableOpacity
                         underlayColor={''}
                         onPress={() => { onShare(filePath) }}
-                        style={{ flex: 1, alignItems: 'flex-end', marginLeft: 10, zIndex: 99 }}
+                        style={{ flex: 1, alignItems: 'flex-end', marginLeft: 10, zIndex: 999999 }}
                     >
                         <View
                             style={{

@@ -17,6 +17,12 @@ import BackgroundFetch from "react-native-background-fetch";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadFiles } from '../../utils/utils.mjs';
 
+import { Alert, Linking } from 'react-native';
+
+
+const openSettings = () => {
+    Linking.openSettings();
+  };
 
 
 const loadAndSavePPTDirectoryPaths = async () => {
@@ -101,8 +107,7 @@ const Home = ({ navigation }) => {
             });
 
         RNFS.mkdir(SCANNER_DOCUMENT_PATH);
-        // checkServerConnection((val) => { setIsConnected(val) })
-        setIsConnected(true);
+        checkServerConnection((val) => { setIsConnected(val) })
 
         setTimeout(() => {
             setShowSplash(false);
@@ -115,7 +120,7 @@ const Home = ({ navigation }) => {
 
     const requestPermission = async () => {
         try {
-            const granted = await PermissionsAndroid.request(
+            const result = await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
                 PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                 {
@@ -127,13 +132,23 @@ const Home = ({ navigation }) => {
                 },
             );
             console.log('====================================');
-            console.log(granted);
+            console.log(result);
             console.log('====================================');
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            if (result === PermissionsAndroid.RESULTS.GRANTED) {
                 createfolder();
-            } else {
-                console.log('Storage permission denied');
-            }
+            } else if (result === PermissionsAndroid.RESULTS.DENIED) {
+                console.log('Storage Permission Denied.');
+            } else if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+                console.log('Storage Permission Denied with Never Ask Again.');
+                Alert.alert(
+                  'Storage Permission Required',
+                  'App needs access to your storage to read files. Please go to app settings and grant permission.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Open Settings', onPress: openSettings },
+                  ],
+                );
+              }
         } catch (err) {
             console.warn(err);
         }
@@ -211,7 +226,8 @@ const Home = ({ navigation }) => {
                         imageSource={require('../../assets/Images/Presentation.png')}
                         iconColor={'#E28C20'}
                         iconBackgroundColor={"#F8BBD0"}
-                        onPress={() => navigation.navigate("Templates")}
+                        onPress={() => handleNavigation("Templates")}
+                        topRightIconName={isConnected ? null : 'wifi-off'}
                         />
 
                 </View>

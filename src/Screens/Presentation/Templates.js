@@ -1,19 +1,22 @@
 import { StyleSheet, Text, View, Dimensions, FlatList } from 'react-native'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useState, useEffect } from 'react';
 import TemplateItem from './TemplateItem';
-
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AnimatedIcon from '../../Components/AnimatedIcon';
+import Banner from '../../Components/BannersAd/Banner';
 import SubScreenHeader from '../../Components/SubScreenHeader';
 
 import { getTemplates } from '../../api/api.mjs';
+
 
 
 const { height, width } = Dimensions.get('window');
 
 
 const Templates = ({ navigation }) => {
-    // load templates on load
     const [templates, setTemplates] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         console.log('====================================');
@@ -22,9 +25,11 @@ const Templates = ({ navigation }) => {
         getTemplates({
             successCallback: (response) => {
                 setTemplates(response);
+                setLoading(false);
             },
             errorCallback: (error) => {
                 console.log(error);
+                setLoading(false);
             }
         });
     }, []);
@@ -32,6 +37,8 @@ const Templates = ({ navigation }) => {
     const handleTemplateSelection = ({ templateId }) => {
         navigation.navigate('Presentation', { templateId });
     }
+
+    console.log(templates);
 
     return (
         <View>
@@ -41,27 +48,74 @@ const Templates = ({ navigation }) => {
                 onPress={() => navigation.goBack()}
             />
             <View style={[styles.ScrollView]} >
-                <View style={{ alignItems: "center", alignContent: "center", height: height / 16.8 }}>
-                    <Text style={styles.text}>Templates</Text>
-                </View>
-                <FlatList
-                    data={templates}
-                    renderItem={({ item }) => {
-                        return <TemplateItem
-                            imageSource={item.imageUrl}
-                            txt={item.title}
-                            iconBackgroundColor={"white"}
-                            onPress={() => handleTemplateSelection({ templateId: item.id })}
+                {
+                    loading ? (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                zIndex: 999,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                alignContent: 'center',
+                                height: height
+                            }}
                         >
-                        </TemplateItem>
-                    }}
-                    keyExtractor={(item, index) => index.toString()}
-                    numColumns={2}
-                    showsVerticalScrollIndicator={false}
-                />
+                            {/* <AnimatedIcon name='wait' style={{ width: 150, height: 150 }} /> */}
+                            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#9c9a9a' }}>Loading Templates. Please wait</Text>
+                        </View>
+                    ) : (
+                        <Fragment>
+                            <View style={{ alignItems: "center", alignContent: "center", height: height / 16.8 }}>
+                                <Text style={styles.text}>Templates</Text>
+                            </View>
+                            {templates && (
+                                <View
+                                    style={{
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        height: '80%',
+                                        backgroundColor: 'white',
+                                        borderRadius: 10,
+                                    }}
+                                >
+
+                                    <FlatList
+                                        ListFooterComponent={() => <View style={{ height: 50 }}></View>}
+                                        ListEmptyComponent={() => (
+                                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: '40%' }}>
+                                                <MaterialCommunityIcons color={'#dedcdc'} name='file' size={100} />
+                                                <Text style={{ color: '#9c9a9a', fontWeight: 'bold', fontSize: 20 }}>No Templates found.</Text>
+                                            </View>
+                                        )}
+                                        data={templates ? templates : []}
+                                        renderItem={({ item }) => (
+                                            <TemplateItem
+                                                imageSource={item.imageUrl}
+                                                txt={item.title}
+                                                iconBackgroundColor={"white"}
+                                                onPress={() => handleTemplateSelection({ templateId: item.id })}
+                                            />
+                                        )}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        numColumns={2}
+                                    // contentContainerStyle={{ justifyContent: 'space-between' }}
+                                    />
+                                </View>
+                            )}
+
+                        </Fragment>
+
+                    )}
+            </View>
+            {/* View that will have items at bottom */}
+            <View style={{ flex: 1, marginTop: 5, alignSelf: 'flex-end' }}>
+                <Banner />
             </View>
         </View>
-
     )
 }
 
@@ -76,17 +130,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     ScrollView: {
-        height: height / 2,
-        // borderColor: "black",
-        // borderWidth: 2,
-        // borderRadius: 20,
+        height: height - 60,
         width: width / 1.05,
         alignSelf: "center",
         paddingHorizontal: 2,
-        // elevation: 3,
-        // backgroundColor: 'white',
         paddingBottom: 10,
-        // alignItems:"center"
-
     }
 })

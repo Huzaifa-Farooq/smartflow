@@ -6,7 +6,8 @@ import { Buffer } from 'buffer';
 import RNFetchBlob from 'rn-fetch-blob';
 
 
-axios.defaults.baseURL = 'https://smartflow3-tb3z2n5h.b4a.run/';
+axios.defaults.baseURL = 'http://3.108.117.20';
+// axios.defaults.baseURL = 'http://192.168.43.92:8001';
 
 
 export const generateAssignment = ({ title, mode, successCallback, errorCallback }) => {
@@ -64,7 +65,6 @@ const generateNotesWithFile = async ({
     }
     })
       .promise.then((response) => {
-        console.log(typeof response.body)
         // The server will respond with bytes of the file
         const headers = response.headers;
         const filename = headers['content-disposition'].split('filename=')[1];
@@ -171,7 +171,7 @@ export const getTemplates = ({ successCallback, errorCallback }) => {
 
 export const checkServerConnection = (onResponse) => {
   console.log('====================================');
-  axios.get('').then((response) => {
+  axios.get('/').then((response) => {
     console.log('Server is up and running');
     onResponse(true);
   }).catch((error) => {

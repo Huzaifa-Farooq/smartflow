@@ -219,7 +219,7 @@ export default FilesListComponent = ({
             {loading && <FileLoadingComponent />}
 
             <View style={animatedFilesListViewStyle}>
-                <Animated.FlatList
+                <FlatList
                     refreshControl={
                         <RefreshControl
                             tintColor="#deb018"
@@ -249,7 +249,7 @@ export default FilesListComponent = ({
 
 
 export const onShare = async (filePath) => {
-    filePath = filePath.replace(' ', '%20');
+    filePath = filePath.replace(/ /g, '%20');
     const options = {
         title: 'Share',
         message: 'Sent via Smartflow',
@@ -341,4 +341,3 @@ const styles = StyleSheet.create({
 
     }
 });
-
