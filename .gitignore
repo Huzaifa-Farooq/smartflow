@@ -1,0 +1,5 @@
+node_modules
+android/app/build/
+modules/react-native-ppt-to-text/android/build/
+android/.gradle/
+
