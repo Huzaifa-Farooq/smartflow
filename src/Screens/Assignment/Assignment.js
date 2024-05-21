@@ -84,7 +84,7 @@ const Assignment = ({ navigation }) => {
                 <TextInput
                     multiline={true}
                     placeholder='Enter your Topic'
-                    placeholderTextColor='#777777'
+                    placeholderTextColor='#3d3a3a'
                     style={styles.textInput}
                     value={topic}
                     onChangeText={(text) => setTopic(text)}
@@ -136,7 +136,7 @@ const Assignment = ({ navigation }) => {
                 <TouchableOpacity
                     style={[buttonDisabled ? styles.button1 : styles.button]}
                     onPress={() => { setDisplayModal(true); }}
-                    disabled={topic === '' || requestInProgress}
+                    disabled={topic === ''}
                 >
                     <Text style={styles.btnText}>Generate</Text>
                 </TouchableOpacity>
@@ -184,13 +184,13 @@ const styles = StyleSheet.create({
     },
 
     btnText: {
-        color: '#fff',
+        color: '#3d3a3a',
         fontSize: 22,
         fontWeight: 'bold'
     },
 
     textColor: {
-        color: '#777777'
+        color: '#3d3a3a'
     }
 });
 

@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
 
     },
     btn_text: {
-        color: "#fff",
+        color: "#3d3a3a",
         fontWeight: 'bold',
         fontSize: 22
     }

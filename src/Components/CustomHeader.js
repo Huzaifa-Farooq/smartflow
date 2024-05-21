@@ -27,7 +27,7 @@ const CustomHeader = ({ title, icon, onPress }) => {
         <View style={styles.Mainview}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={onPress} style={styles.IconContainer} >
-                    <MaterialCommunityIcons name={icon} size={28} color='#000' />
+                    <MaterialCommunityIcons name={icon} size={46} color='#000' />
                 </TouchableOpacity>
 
                 <Text style={titleStyle}>

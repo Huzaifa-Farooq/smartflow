@@ -40,7 +40,7 @@ function DrawerNavigation() {
           width: 200,
           color: "black",
           fontWeight: 'bold',
-          fontSize: 30,
+          fontSize: 40,
         },
       }}>
       <Drawer.Screen name='Home' component={Home} />
