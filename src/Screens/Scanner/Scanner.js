@@ -67,6 +67,7 @@ export default Scanner = ({ router, navigation }) => {
       <FilesListComponent
         navigation={navigation}
         directories={[SCANNER_DOCUMENT_PATH]}
+        required_ext={['.pdf']}
       />
       <FloatingButton
         iconName={'camera'}

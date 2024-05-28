@@ -27,13 +27,11 @@ export default DocViewer = ({ navigation, route }) => {
                         }}
                     >
                         <Text
-                            numberOfLines={1}
-                            textBreakStrategy='simple'
                             style={{
                                 fontSize: 16,
                                 color: 'black',
                             }}>
-                            {name}
+                            { name.length > 30 ? name.substring(0, 30) + "..." : name}
                         </Text>
                     </View>
                 }

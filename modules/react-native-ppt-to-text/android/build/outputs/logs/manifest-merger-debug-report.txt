@@ -1,25 +1,25 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
+ADDED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
 	package
-		INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-		ADDED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
-		INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		ADDED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:1-2:12
+		INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
 	xmlns:android
-		ADDED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:11-69
+		ADDED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml:1:11-69
 uses-sdk
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml reason: use-sdk injection requested
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml reason: use-sdk injection requested
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
 	android:targetSdkVersion
-		INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-		ADDED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-		INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		ADDED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
 	android:minSdkVersion
-		INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-		ADDED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
-		INJECTED from D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		ADDED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+		INJECTED from D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml

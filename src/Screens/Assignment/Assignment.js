@@ -136,7 +136,7 @@ const Assignment = ({ navigation }) => {
                 <TouchableOpacity
                     style={[buttonDisabled ? styles.button1 : styles.button]}
                     onPress={() => { setDisplayModal(true); }}
-                    disabled={topic === ''}
+                    disabled={topic === '' || requestInProgress}
                 >
                     <Text style={styles.btnText}>Generate</Text>
                 </TouchableOpacity>

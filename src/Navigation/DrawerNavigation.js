@@ -5,6 +5,7 @@ import {
 } from '@react-navigation/drawer';
 import Home from '../Screens/Home/Home';
 import FeedBack from '../Screens/FeedBack/FeedBack';
+import AboutUs from '../Screens/AboutUs/AboutUs';
 import { View, Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Dimensions } from 'react-native';
@@ -45,6 +46,7 @@ function DrawerNavigation() {
       }}>
       <Drawer.Screen name='Home' component={Home} />
       <Drawer.Screen name='FeedBack' component={FeedBack} />
+      <Drawer.Screen name='About Us' component={AboutUs} />
 
     </Drawer.Navigator>
   );

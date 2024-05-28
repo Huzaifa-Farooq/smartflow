@@ -18,7 +18,18 @@ const PDFMergerProgressModal = ({
                 <View style={styles.modalView}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <AnimatedIcon name={iconName} style={{ width: 100, height: 100 }} />
-                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: 'black' }}>{text}</Text>
+                        <Text 
+                        style={{ 
+                            fontSize: 14, 
+                            fontWeight: 'bold', 
+                            color: 'black', 
+                            padding: 10 
+                            }}
+                        numberOfLines={2}
+                        ellipsizeMode='tail'
+                        >
+                            {text}
+                            </Text>
                     </View>
                 </View>
             </View>

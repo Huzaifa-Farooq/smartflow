@@ -3,6 +3,6 @@
 3    package="com.ppttotext" >
 4
 5    <uses-sdk android:minSdkVersion="26" />
-5-->D:\StdyApp\New folder (2)\Smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
+5-->D:\SmarflowInitial\smartflow\node_modules\react-native-ppt-to-text\android\src\main\AndroidManifestNew.xml
 6
 7</manifest>

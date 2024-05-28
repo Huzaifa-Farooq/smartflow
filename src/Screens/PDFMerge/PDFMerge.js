@@ -2,12 +2,14 @@
 import CustomHeader from '../../Components/CustomHeader';
 import {
     StyleSheet, Text, View, Animated, TouchableHighlight, Dimensions, ScrollView,
-    RefreshControl
+    RefreshControl, Alert
 } from 'react-native';
 import { React, useState, useEffect, useRef } from 'react';
 import RNFS from 'react-native-fs';
 import FileViewer from "react-native-file-viewer";
 import Banner from '../../Components/BannersAd/Banner';
+import Dialog, { DialogContent } from 'react-native-popup-dialog';
+
 
 import { DocumentItem } from '../../Components/DocumentItem';
 import { getFileIcon, formatSize } from '../../utils/utils.mjs';
@@ -30,6 +32,7 @@ const PDFMerge = ({ navigation }) => {
     const [progressMessage, setProgressMessage] = useState('');
 
     const MAX_FILES = 5;
+    const MAX_FILE_SIZE = 10000000; // 10MB
 
     const updateSelectedFiles = (file) => {
         console.log('file', file);
@@ -38,8 +41,29 @@ const PDFMerge = ({ navigation }) => {
             setSelectedFiles(selectedFiles.filter((path) => path !== file.path));
         }
         else if (selectedFiles.length < MAX_FILES) {
-            // if file path not in array then add it
-            setSelectedFiles([...selectedFiles, file.path]);
+            // check file size. If it is greater than MAX_FILE_SIZE then display a popup message
+            if (file.size > MAX_FILE_SIZE) {
+                Alert.alert(
+                    "File Size Exceeded",
+                    "The selected file size is greater than the maximum allowed size. (10MB)",
+                    [
+                        { text: "OK", onPress: () => {} }
+                    ],
+                    { cancelable: false }
+                );            
+            } else {
+                // if file path not in array then add it
+                setSelectedFiles([...selectedFiles, file.path]);
+            }
+        } else {
+            Alert.alert(
+                "File Count Reached",
+                "Upto 5 files allowed.",
+                [
+                    { text: "OK", onPress: () => {} }
+                ],
+                { cancelable: false }
+            );     
         }
     }
 
@@ -58,9 +82,9 @@ const PDFMerge = ({ navigation }) => {
                 setCompleted(true);
                 setTimeout(() => {
                     navigation.navigate('Downloads');
-                    FileViewer.open(filePath, { showOpenWithDialog: true });
                     setCompleted(false);
                     setMergeInProgress(false);
+                    navigation.navigate('DocViewer', { path: filePath, name: filename });
                 }, 3000);
             },
             errorCallback: (error) => {

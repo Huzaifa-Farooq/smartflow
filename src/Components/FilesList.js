@@ -11,6 +11,7 @@ import FileViewer from "react-native-file-viewer";
 import { DocumentItem } from './DocumentItem';
 import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../utils/utils.mjs';
 import { animatedFilesListViewStyle } from '../styles/styles';
+import { error } from 'pdf-lib';
 
 
 const height = Dimensions.get('window').height;
@@ -161,7 +162,18 @@ export default FilesListComponent = ({
             if (path.endsWith('.pdf')) {
                 navigation.navigate('DocViewer', { path, name })
             } else {
-                FileViewer.open(path, { showOpenWithDialog: true });
+                    FileViewer.open(path, { showOpenWithDialog: true })
+                    .then()
+                    .catch((error) => {
+                    Alert.alert(
+                        "No Associated App",
+                        "There is no app associated with this file type. Please download appropriate viewer to open it.",
+                        [
+                            { text: "OK", onPress: () => console.log("OK Pressed") }
+                        ],
+                        { cancelable: false }
+                    );
+                })
             }
         }
     }

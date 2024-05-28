@@ -38,8 +38,6 @@ const Templates = ({ navigation }) => {
         navigation.navigate('Presentation', { templateId });
     }
 
-    console.log(templates);
-
     return (
         <View>
             <SubScreenHeader
