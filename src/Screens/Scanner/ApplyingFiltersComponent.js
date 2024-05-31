@@ -10,6 +10,7 @@ import { createImagesPDF } from './utils';
 import ProgressModal from './ProgressModal';
 import { useMemo } from 'react';
 import React from 'react';
+import '../../utils/global.js';
 
 
 const screenWidth = Dimensions.get('window').width;
@@ -17,7 +18,7 @@ const numColumns = 3;
 const itemSize = (screenWidth / numColumns) - 20;
 
 
-const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
+const SCANNER_DOCUMENT_PATH = global.SCANNER_DOCUMENT_PATH;
 
 
 const FileNameInputTag = ({ txt, onChangeText }) => {
@@ -111,8 +112,8 @@ export default ApplyingFiltersComponent = ({ route, navigation }) => {
 
     const onExtractImage = ({ srcURI, dstURI }) => {
         // saving both srcURI and dstURI images to Downloads directory
-        const srcPath = `${RNFS.DownloadDirectoryPath}/${srcURI.split('/').pop()}`;
-        const dstPath = `${RNFS.DownloadDirectoryPath}/${dstURI.split('/').pop()}`;
+        const srcPath = `${RNFS.TemporaryDirectoryPath}/${srcURI.split('/').pop()}`;
+        const dstPath = `${RNFS.TemporaryDirectoryPath}/${dstURI.split('/').pop()}`;
 
         RNFS.copyFile(srcURI, srcPath).then(() => {
             console.log('Copied image', srcURI, ' at: ' + srcPath);

@@ -8,9 +8,10 @@ import FileViewer from "react-native-file-viewer";
 import CustomHeader from '../../Components/CustomHeader';
 import ErrorDialog from '../../Components/ErrorDialog';
 import AnimatedIcon from '../../Components/AnimatedIcon';
-import { getFileIcon, formatSize } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, openFile } from '../../utils/utils.mjs';
 import { generatePresentation } from '../../api/api.mjs';
 import { DocumentItem } from '../../Components/DocumentItem';
+import '../../utils/global.js';
 
 
 const { height, width } = Dimensions.get('window');
@@ -26,15 +27,11 @@ const Presentation = ({ route, navigation }) => {
     const inputRef = useRef(null);
 
 
-    const PRESENTATION_FOLDER = RNFS.DownloadDirectoryPath + '/SmartFlow/Presentations';
+    const PRESENTATION_FOLDER = global.PRESENTATION_FOLDER;
     // create folder if not exists
     RNFS.mkdir(PRESENTATION_FOLDER);
 
     const { templateId } = route.params;
-
-    const Fileopener = (path) => {
-        FileViewer.open(path, { showOpenWithDialog: true })
-    };
 
     const handleInputFocus = () => {
         setScrollViewHeight(height / 3); // Adjust height on focus
@@ -118,9 +115,14 @@ const Presentation = ({ route, navigation }) => {
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <TouchableHighlight
                             underlayColor={''}
-                            onPress={() => Fileopener(downloadedFile.path)}
+                            onPress={() => openFile(navigation, downloadedFile.path)}
                         >
-                            <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
+                            <DocumentItem 
+                                iconSrc={getFileIcon(downloadedFile.name)} 
+                                title={downloadedFile.name} 
+                                size={formatSize(downloadedFile.size)} 
+                                filePath={downloadedFile.path}
+                                />
                         </TouchableHighlight>
                     </View>
                 )

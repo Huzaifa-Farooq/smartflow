@@ -9,11 +9,11 @@ import FileViewer from "react-native-file-viewer";
 
 import { generateAssignment } from '../../api/api.mjs';
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, openFile } from '../../utils/utils.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
 import AnimatedIcon from '../../Components/AnimatedIcon';
 import AssignmentsOptionModal from '../../Components/AssignmentOptionModel';
-
+import '../../utils/global.js';
 
 // create a component
 const Assignment = ({ navigation }) => {
@@ -25,13 +25,8 @@ const Assignment = ({ navigation }) => {
     const [downloadedFile, setDownloadedFile] = useState(null);
     const [displayModal, setDisplayModal] = useState(false);
 
-    const ASSIGNMENT_FOLDER = RNFS.DownloadDirectoryPath + '/SmartFlow/Assignments';
+    const ASSIGNMENT_FOLDER = global.ASSIGNMENT_FOLDER;
     RNFS.mkdir(ASSIGNMENT_FOLDER)
-
-
-    const Fileopener = (path) => {
-        FileViewer.open(path, { showOpenWithDialog: true })
-    };
 
     const handleAssignmentInput = (mode) => {
         // disable the button and let the user know that the request is being processed
@@ -106,9 +101,14 @@ const Assignment = ({ navigation }) => {
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <TouchableHighlight
                             underlayColor={''}
-                            onPress={() => Fileopener(downloadedFile.path)}
+                            onPress={() => openFile(navigation, downloadedFile.path)}
                         >
-                            <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
+                            <DocumentItem
+                                iconSrc={getFileIcon(downloadedFile.name)} 
+                                title={downloadedFile.name} 
+                                size={formatSize(downloadedFile.size)} 
+                                filePath={downloadedFile.path}
+                                />
                         </TouchableHighlight>
                     </View>
                 )

@@ -17,10 +17,11 @@ import { pdfMerge } from '../../utils/pdfMerge';
 
 import ErrorDialog from '../../Components/ErrorDialog';
 import PDFMergerProgressModal from '../../Components/PDFMergerProgressModal';
+import FilesListComponent, { handleLongPress } from '../../Components/FilesList';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 
-import FilesListComponent, { handleLongPress } from '../../Components/FilesList';
+import '../../utils/global.js';
 
 
 // create a component
@@ -72,7 +73,7 @@ const PDFMerge = ({ navigation }) => {
         setMergeInProgress(true);
 
         const defaultFilename = 'Merged-' + Date.now() + '.pdf';
-        const filePath = RNFS.DownloadDirectoryPath + '/SmartFlow/' + defaultFilename;
+        const filePath = global.MERGED_PDF_DIRECTORY + '/' + defaultFilename;
 
         pdfMerge({
             files: selectedFiles,
@@ -132,7 +133,8 @@ const PDFMerge = ({ navigation }) => {
                 directories={[
                     RNFS.DownloadDirectoryPath + '/SmartFlow', 
                     RNFS.DocumentDirectoryPath,
-                    '/storage/emulated/0/WhatsApp/'
+                    '/storage/emulated/0/WhatsApp/',
+                    global.APP_DIRECTORY
                 ]}
                 renderItem={renderItem}
                 required_ext={['.pdf']}

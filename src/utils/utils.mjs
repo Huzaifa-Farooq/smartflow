@@ -1,5 +1,7 @@
 import RNFS from 'react-native-fs';
 import { readPpt } from 'react-native-ppt-to-text';
+import FileViewer from "react-native-file-viewer";
+import RNFetchBlob from 'rn-fetch-blob';
 
 
 
@@ -10,6 +12,35 @@ export const extractTextFromPpt = async (path) => {
     } catch (e) {
         console.log('Error extracting text from ppt: ', e);
         return '';
+    }
+}
+
+export const openFile = async (navigation, path) => {
+    const name = path.split('/').pop();
+    if (path.endsWith('.pdf')) {
+        navigation.navigate('DocViewer', { path, name })
+    } else {
+        // getting mime type of file
+        const mimeType = await RNFetchBlob.fs.stat(path).then((stats) => {
+            return stats.mime;
+        });
+        RNFetchBlob.android.actionViewIntent(path, mimeType)
+            .catch((error) => {
+                console.log('Error opening file usng intent: ', error);
+                FileViewer.open(path, { showOpenWithDialog: true })
+                    .catch((error) => {
+                        Alert.alert(
+                            "No Associated App",
+                            "There is no app associated with this file type. Please download appropriate viewer to open it.",
+                            [
+                                { text: "OK", onPress: () => console.log("OK Pressed") }
+                            ],
+                            { cancelable: false }
+                        );
+                    })
+            })
+
+
     }
 }
 
@@ -58,12 +89,12 @@ const loadFiles = async ({
         }
     }
 
-    if (!RNFS.exists(encodeURIComponent(directoryPath))){
+    if (!RNFS.exists(encodeURIComponent(directoryPath))) {
         return [];
     }
 
     let fileNames = [];
-    try{
+    try {
         fileNames = await RNFS.readDir(directoryPath);
     } catch (e) {
         console.log('============== Error reading directory ======================');
@@ -145,7 +176,7 @@ export const getFileName = async (directory, fileName) => {
     let i = 1;
     while (i < 100) {
         const fileExists = await RNFS.exists(`${directory}/${newFileName}.${extension}`)
-        if (fileExists){
+        if (fileExists) {
             console.log(`${directory}/${newFileName}.${extension} exists`);
             newFileName = `${fileName}(${i})`;
             i++;

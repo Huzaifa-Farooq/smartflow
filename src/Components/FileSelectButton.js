@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/dist/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
+import { openDocument } from 'react-native-saf-x';
+import '../utils/global.js';
 
 
 const window = Dimensions.get('window');
@@ -21,9 +23,12 @@ export default FileSelectButton = ({ onFileSelect, allowedTypes, allowMultiSelec
         try {
             const file = await DocumentPicker.pickSingle({
                 type: allowedTypes,
+                // mode: 'import',
+                // copyTo: 'documentDirectory',
                 allowMultiSelection: allowMultiSelection,
                 transitionStyle: 'coverVertical',
             });
+            console.log(file)
             onFileSelect(file);
         } catch (err) {
             if (DocumentPicker.isCancel(err)) {

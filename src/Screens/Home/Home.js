@@ -17,12 +17,9 @@ import BackgroundFetch from "react-native-background-fetch";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadFiles } from '../../utils/utils.mjs';
 
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 
-
-const openSettings = () => {
-    Linking.openSettings();
-  };
+import '../../utils/global.js';
 
 
 const loadAndSavePPTDirectoryPaths = async () => {
@@ -79,10 +76,6 @@ BackgroundFetch.configure(
 BackgroundFetch.start();
 
 
-
-
-const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
-
 const Home = ({ navigation }) => {
     const [isConnected, setIsConnected] = useState(null);
     const [error, setError] = useState('');
@@ -106,7 +99,6 @@ const Home = ({ navigation }) => {
                 console.log('Error getting PDFDirectoryPaths ' + e);
             });
 
-        RNFS.mkdir(SCANNER_DOCUMENT_PATH);
         checkServerConnection((val) => { setIsConnected(val) })
 
         setTimeout(() => {
@@ -135,19 +127,19 @@ const Home = ({ navigation }) => {
             console.log(result);
             console.log('====================================');
             if (result === PermissionsAndroid.RESULTS.GRANTED) {
-                createfolder();
+                console.log('Storage Permission Granted.');
             } else if (result === PermissionsAndroid.RESULTS.DENIED) {
                 console.log('Storage Permission Denied.');
             } else if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
                 console.log('Storage Permission Denied with Never Ask Again.');
-                Alert.alert(
-                  'Storage Permission Required',
-                  'App needs access to your storage to read files. Please go to app settings and grant permission.',
-                  [
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Open Settings', onPress: openSettings },
-                  ],
-                );
+                // Alert.alert(
+                //   'Storage Permission Required',
+                //   'App needs access to your storage to read files. Please go to app settings and grant permission.',
+                //   [
+                //     { text: 'Cancel', style: 'cancel' },
+                //     { text: 'Open Settings', onPress: openSettings },
+                //   ],
+                // );
               }
         } catch (err) {
             console.warn(err);
@@ -160,15 +152,6 @@ const Home = ({ navigation }) => {
         } else if (!isConnected) {
             setError("No internet connection");
         }
-    };
-
-    const createfolder = async () => {
-        const folder = RNFS.DownloadDirectoryPath + '/SmartFlow/';
-        RNFS.mkdir(folder).then(res => {
-            console.log('folder created');
-        }).catch(error => {
-            console.log(error);
-        })
     };
 
     if (showSplash) {

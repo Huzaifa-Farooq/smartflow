@@ -8,10 +8,9 @@ import { React, useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import RNFS from 'react-native-fs';
 import CustomHeader from '../../Components/CustomHeader';
 import Banner from '../../Components/BannersAd/Banner';
-import FileViewer from "react-native-file-viewer";
 
 import { DocumentItem } from '../../Components/DocumentItem';
-import { getFileIcon, formatSize, getFileName } from '../../utils/utils.mjs';
+import { getFileIcon, formatSize, getFileName, openFile } from '../../utils/utils.mjs';
 import NotesOptionModal from '../../Components/NotesOptionModal';
 import { generateNotes } from '../../api/api.mjs';
 import ErrorDialog from '../../Components/ErrorDialog';
@@ -20,8 +19,19 @@ import DocumentPicker from 'react-native-document-picker';
 import NotesProgressModal from '../../Components/NotesProgressModal';
 import FilesListComponent from '../../Components/FilesList';
 import RNFetchBlob from 'rn-fetch-blob';
+import { copyFile } from 'react-native-saf-x';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import '../../utils/global.js';
 
+
+const DEFAULT_PPT_DIRS = [
+    global.APP_DIRECTORY,
+    RNFS.DownloadDirectoryPath + '/SmartFlow',
+    RNFS.DocumentDirectoryPath,
+    '/storage/emulated/0/WhatsApp/',
+    '/Internal storage/Android/media/com.whatsapp/WhatsApp/',
+    '/Internal storage/Android/media/com.whatsapp'
+];
 
 // create a component
 const Notes = ({ navigation }) => {
@@ -31,25 +41,18 @@ const Notes = ({ navigation }) => {
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState();
-    const [pptDirectories, setPPTDirectories] = useState([
-        RNFS.DownloadDirectoryPath + '/SmartFlow',
-        RNFS.DocumentDirectoryPath,
-        '/storage/emulated/0/WhatsApp/',
-        '/Internal storage/Android/media/com.whatsapp/WhatsApp/',
-        '/Internal storage/Android/media/com.whatsapp'
-    ]);
+    const [pptDirectories, setPPTDirectories] = useState(DEFAULT_PPT_DIRS);
 
     useEffect(() => {
         getPPTDirectories();
     }, []);
 
-    const Fileopener = (path) => {
-        FileViewer.open(path, { showOpenWithDialog: true })
-    };
-
     const handleFileSelect = async ({ name, size, path, uri }) => {
         if (!path && uri) {
-            path = (await RNFetchBlob.fs.stat(uri)).path;
+            fileCopyUri = global.PPT_IMPORT_DIRECTORY + "/" + name;
+            console.log('Copying file to ', fileCopyUri);
+            await RNFS.copyFile(uri, fileCopyUri);
+            path = fileCopyUri;
         }
         console.log('File selected: ', path);
         setDisplayModal(true);
@@ -97,9 +100,9 @@ const Notes = ({ navigation }) => {
         console.log('Handling response');
         setRequestInProgress(false);
         setUploadProgress(100);
-        const directory = RNFS.DownloadDirectoryPath + '/SmartFlow/';
+        const directory = global.NOTES_DIRECTORY_PATH;
         filename = await getFileName(directory, filename);
-        const filePath = directory + filename;
+        const filePath = directory + "/" + filename;
         console.log('Writing file to disk.');
         RNFS.writeFile(filePath, base64, 'base64')
             .then(() => {
@@ -129,7 +132,12 @@ const Notes = ({ navigation }) => {
         AsyncStorage.getItem('@PPTDirectoryPaths')
             .then((value) => {
                 if (value !== null) {
-                    setPPTDirectories(JSON.parse(value));
+                    const dirs = JSON.parse(value);
+                    // adding default directories to the list
+                    dirs.push(...DEFAULT_PPT_DIRS);
+                    // removing dups
+                    const uniqueDirs = [...new Set(dirs)];
+                    setPPTDirectories(uniqueDirs);
                 }
             })
             .catch((e) => {
@@ -158,7 +166,6 @@ const Notes = ({ navigation }) => {
                 onFileClick={(file) => handleFileSelect(file)}
             />
 
-
             {
                 displayModal && (
                     <NotesOptionModal
@@ -185,7 +192,7 @@ const Notes = ({ navigation }) => {
                 downloadedFile && (
                     <NotesOutputComponent
                         downloadedFile={downloadedFile}
-                        onPress={() => { Fileopener(downloadedFile.path) }}
+                        onPress={() => { openFile(navigation, downloadedFile.path) }}
                         onClose={() => setDownloadedFile(null)}
                     />
                 )
@@ -223,46 +230,27 @@ const NotesOutputComponent = ({ downloadedFile, onPress, onClose }) => {
             onRequestClose={onClose}
         >
             <TouchableWithoutFeedback onPress={onClose}>
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }} >
-                    <View
-                        style={{
-                            height: 150,
-                            backgroundColor: '#ffff',
-                            // ading shadows
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 1,
-                            shadowRadius: 3.84,
-
-                        }}
-                    >
-                        <View style={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalInnerContent}>
                             <TouchableHighlight
                                 underlayColor={''}
                                 onPress={onPress}
                             >
-                                <DocumentItem iconSrc={getFileIcon(downloadedFile.name)} title={downloadedFile.name} size={formatSize(downloadedFile.size)} />
+                                <DocumentItem 
+                                    iconSrc={getFileIcon(downloadedFile.name)} 
+                                    title={downloadedFile.name} 
+                                    size={formatSize(downloadedFile.size)} 
+                                    filePath={downloadedFile.path}
+                                />
                             </TouchableHighlight>
                         </View>
                     </View>
                 </View>
-
             </TouchableWithoutFeedback>
         </Modal>
-
     )
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
@@ -292,15 +280,31 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         marginHorizontal: 10,
         marginVertical: 2
-
     },
     RBText: {
         fontSize: 26,
         color: '#000',
         fontWeight: 'bold'
-
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        height: 150,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 3,
+    },
+    modalInnerContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     }
 });
-
 
 export default Notes;

@@ -4,11 +4,9 @@ import { StyleSheet, View, TouchableHighlight, Animated, RefreshControl } from '
 import { React, useState, useEffect, useRef } from 'react';
 import RNFS from 'react-native-fs'
 import Banner from '../../Components/BannersAd/Banner';
+import '../../utils/global.js';
 
 import FilesListComponent from '../../Components/FilesList';
-
-
-const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
 
 
 const Downloads = ({ navigation }) => {
@@ -21,7 +19,9 @@ const Downloads = ({ navigation }) => {
             />
             <FilesListComponent
                 navigation={navigation}
-                directories={[RNFS.DownloadDirectoryPath + '/SmartFlow', SCANNER_DOCUMENT_PATH]}
+                directories={[
+                    global.APP_DIRECTORY
+                ]}
             />
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                 <Banner />

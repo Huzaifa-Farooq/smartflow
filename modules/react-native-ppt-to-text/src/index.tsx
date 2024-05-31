@@ -22,7 +22,10 @@ export function multiply(a: number, b: number): Promise<number> {
 }
 
 export function readPpt(path: string): Promise<string[]> {
-  return PptToText.readPpt(path);
-}
+  try {
+    return PptToText.readPpt(path);
+  } catch (error) {
+    return Promise.reject("Error while reading ppt file " + error);
+  }}
 
 // export default PptToText;

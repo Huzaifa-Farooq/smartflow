@@ -19,6 +19,10 @@ import { FloatingButton } from '../../Components/FileSelectButton';
 import DocumentScanner from 'react-native-document-scanner-plugin'
 import CustomHeader from '../../Components/CustomHeader';
 import FilesListComponent from '../../Components/FilesList';
+import '../../utils/global.js';
+
+
+const SCANNER_DOCUMENT_PATH = global.SCANNER_DOCUMENT_PATH;
 
 
 const Header = ({ navigation }) => {
@@ -29,10 +33,6 @@ const Header = ({ navigation }) => {
     />
   )
 };
-
-
-const SCANNER_DOCUMENT_PATH = RNFS.DownloadDirectoryPath + '/SmartFlow/ScannerDocuments';
-
 
 export default Scanner = ({ router, navigation }) => {
   const scanDocument = async () => {
