@@ -2,7 +2,8 @@ import RNFS from 'react-native-fs';
 import { readPpt } from 'react-native-ppt-to-text';
 import FileViewer from "react-native-file-viewer";
 import RNFetchBlob from 'rn-fetch-blob';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { listFiles, exists } from 'react-native-saf-x';
 
 
 export const extractTextFromPpt = async (path) => {
@@ -45,11 +46,11 @@ export const openFile = async (navigation, path) => {
 }
 
 
-const isPdf = (name) => {
+export const isPdf = (name) => {
     return name.includes('.pdf');
 };
 
-const formatSize = (size) => {
+export const formatSize = (size) => {
     if (!size) return '0 Bytes';
 
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -57,7 +58,7 @@ const formatSize = (size) => {
     return parseFloat((size / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-const getFileIcon = (name) => {
+export const getFileIcon = (name) => {
     if (name.includes('.pdf'))
         return require('../assets/Images/pdf.png');
     else if (name.includes('.docx'))
@@ -71,13 +72,14 @@ const getFileIcon = (name) => {
 }
 
 
-const loadFiles = async ({
+export const loadFiles = async ({
     directoryPath,
     directoriesToSkip = [
         'images', '/obb', 'cache', 'video', 'photo', 'voice', 'movies', 'music', '/dcim/',
         'sdk', 'gallery', 'img', 'movie', 'temp', 'tmp'
     ],
     required_ext = ['*'],
+    visitedDirectories = []
 }) => {
     const hasExtension = (name) => {
         // if required extension has * then return true
@@ -89,13 +91,34 @@ const loadFiles = async ({
         }
     }
 
-    if (!RNFS.exists(encodeURIComponent(directoryPath))) {
+    if (!exists(directoryPath)){
         return [];
     }
 
     let fileNames = [];
-    try {
-        fileNames = await RNFS.readDir(directoryPath);
+    try{
+        if (directoryPath.toLowerCase().includes('content://')) {
+            fileNames = await listFiles(directoryPath);
+            fileNames = fileNames.map((file) => {
+                return {
+                    ...file,
+                    isDirectory: file.type === 'directory',
+                    isFile: file.type === 'file',
+                    path: file.uri,
+                };
+            });
+        } else {
+            fileNames = await RNFS.readDir(directoryPath);
+            fileNames = fileNames.map((file) => {
+                return {
+                    ...file,
+                    isDirectory: file.isDirectory(),
+                    isFile: file.isFile(),
+                };
+            });
+        }
+        console.log('Reading directory: ' + directoryPath)
+
     } catch (e) {
         console.log('============== Error reading directory ======================');
         console.log('Directory: ' + directoryPath);
@@ -103,21 +126,22 @@ const loadFiles = async ({
         return [];
     }
     const requiredFiles = [];
-    const visitedDirectories = [];
 
     await Promise.all(fileNames.map(async (file) => {
-        if (file && file.isFile() && hasExtension(file.name)) {
+        if (file && file.isFile && hasExtension(file.name)) {
             requiredFiles.push(file);
-        } else if (file.isDirectory()) {
+        } else if (file.isDirectory) {
             if (directoriesToSkip.some((dir) => file.path.toLowerCase().includes(dir))) {
                 return;
             }
+            
             if (visitedDirectories.includes(file.path)) {
                 return;
             }
             else {
                 visitedDirectories.push(file.path);
-                const subFiles = await loadFiles({ directoryPath: file.path, required_ext, directoriesToSkip });
+                console.log('Reading directory: ' + file.path);
+                const subFiles = await loadFiles({ directoryPath: file.path, required_ext, directoriesToSkip, visitedDirectories });
                 requiredFiles.push(...subFiles);
             }
         }
@@ -127,7 +151,7 @@ const loadFiles = async ({
 };
 
 
-const sortFilesArray = ({ files, mode, reversed }) => {
+export const sortFilesArray = ({ files, mode, reversed }) => {
     if (mode === 'size') {
         files = files.sort((a, b) => {
             return a.size - b.size;
@@ -152,12 +176,12 @@ const sortFilesArray = ({ files, mode, reversed }) => {
 };
 
 
-const reverseArray = (arr) => {
+export const reverseArray = (arr) => {
     return arr.reverse();
 };
 
 
-const searchFilesArray = ({ files, query }) => {
+export const searchFilesArray = ({ files, query }) => {
     return files.filter((file) => {
         return file.name.toLowerCase().includes(query.toLowerCase());
     });
@@ -188,5 +212,17 @@ export const getFileName = async (directory, fileName) => {
 }
 
 
-// exporting functions
-export { isPdf, formatSize, getFileIcon, loadFiles, sortFilesArray, reverseArray, searchFilesArray };
+export const loadFoldersToScan = async () => {
+    const storedFolders = await AsyncStorage.getItem('@scanningFolders');
+    return storedFolders ? JSON.parse(storedFolders) : [];
+};
+
+export const saveFoldersToScan = async (folders) => {
+    const storedFolders = await loadFoldersToScan();
+    storedFolders.push(...folders);
+    try {
+        await AsyncStorage.setItem('@scanningFolders', JSON.stringify(storedFolders));
+    } catch(e){
+        console.log('Error saving folders to scan: ', e);
+    }
+}
