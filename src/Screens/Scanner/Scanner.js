@@ -15,6 +15,7 @@ import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import { FloatingButton } from '../../Components/FileSelectButton';
+import { BottomRightStackComponent } from '../../Components/FileSelectButton';
 
 import DocumentScanner from 'react-native-document-scanner-plugin'
 import CustomHeader from '../../Components/CustomHeader';
@@ -51,7 +52,7 @@ export default Scanner = ({ router, navigation }) => {
     });
 
     if (status == 'success' && scannedImages && scannedImages.length > 0) {
-      
+
       navigation.navigate('FilterSelectOption', { scannedImagesList: scannedImages });
     }
   }
@@ -69,9 +70,13 @@ export default Scanner = ({ router, navigation }) => {
         directories={[SCANNER_DOCUMENT_PATH]}
         required_ext={['.pdf']}
       />
-      <FloatingButton
-        iconName={'camera'}
-        onPress={scanDocument}
+      <BottomRightStackComponent
+        components={[
+          <FloatingButton
+            iconName={'camera'}
+            onPress={scanDocument}
+          />
+        ]}
       />
     </View>
 
