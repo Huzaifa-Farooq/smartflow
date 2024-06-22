@@ -9,6 +9,7 @@ import RNFS from 'react-native-fs';
 import CustomHeader from '../../Components/CustomHeader';
 import Banner from '../../Components/BannersAd/Banner';
 
+import FolderSelectButton from '../../Components/FolderSelectButton';
 import { DocumentItem } from '../../Components/DocumentItem';
 import { getFileIcon, formatSize, getFileName, openFile } from '../../utils/utils.mjs';
 import NotesOptionModal from '../../Components/NotesOptionModal';
@@ -18,15 +19,15 @@ import FileSelectButton from '../../Components/FileSelectButton';
 import DocumentPicker from 'react-native-document-picker';
 import NotesProgressModal from '../../Components/NotesProgressModal';
 import FilesListComponent from '../../Components/FilesList';
-import RNFetchBlob from 'rn-fetch-blob';
-import { copyFile } from 'react-native-saf-x';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../../utils/global.js';
+import { loadFoldersToScan } from '../../utils/utils.mjs';
+import { BottomRightStackComponent } from '../../Components/FileSelectButton';
 
+import { transferFile } from 'react-native-saf-x';
 
 const DEFAULT_PPT_DIRS = [
     global.APP_DIRECTORY,
-    RNFS.DownloadDirectoryPath + '/SmartFlow',
+    RNFS.DownloadDirectoryPath,
     RNFS.DocumentDirectoryPath,
     '/storage/emulated/0/WhatsApp/',
     '/Internal storage/Android/media/com.whatsapp/WhatsApp/',
@@ -41,17 +42,27 @@ const Notes = ({ navigation }) => {
     const [requestInProgress, setRequestInProgress] = useState(false);
     const [error, setError] = useState(null);
     const [downloadedFile, setDownloadedFile] = useState();
-    const [pptDirectories, setPPTDirectories] = useState(DEFAULT_PPT_DIRS);
+    const [pptDirectories, setPPTDirectories] = useState([]);
 
     useEffect(() => {
-        getPPTDirectories();
+        const init = async () => {
+            const folders = await loadFoldersToScan();
+            folders.push(...DEFAULT_PPT_DIRS);
+            setPPTDirectories(folders);
+        };
+        init();
     }, []);
 
     const handleFileSelect = async ({ name, size, path, uri }) => {
-        if (!path && uri) {
+        if ((!path && uri) || (path && path.includes('content:'))) {
             fileCopyUri = global.PPT_IMPORT_DIRECTORY + "/" + name;
             console.log('Copying file to ', fileCopyUri);
-            await RNFS.copyFile(uri, fileCopyUri);
+            try{
+                const r = await RNFS.copyFile(uri, fileCopyUri);
+                console.log('copy response: ' , r);
+            } catch (e){
+                console.log('Error copying file using RNFS ', e);
+            }
             path = fileCopyUri;
         }
         console.log('File selected: ', path);
@@ -72,7 +83,7 @@ const Notes = ({ navigation }) => {
             fileName: selectedFile.name,
             actionCode: actionCode,
             progress: (progress) => {
-                if (progress > 99){
+                if (progress > 99) {
                     progress = 100;
                 }
                 setUploadProgress(progress);
@@ -82,7 +93,7 @@ const Notes = ({ navigation }) => {
                 console.log('error while generating notes');
                 console.error(JSON.stringify(error));
                 // printing error message to user
-                if (error.includes('uploading file')){
+                if (error.includes('uploading file')) {
                     setError('Error uploading file');
                 } else {
                     setError('Error while generating notes');
@@ -127,40 +138,16 @@ const Notes = ({ navigation }) => {
         )
     }, [navigation]);
 
-
-    const getPPTDirectories = () => {
-        AsyncStorage.getItem('@PPTDirectoryPaths')
-            .then((value) => {
-                if (value !== null) {
-                    const dirs = JSON.parse(value);
-                    // adding default directories to the list
-                    dirs.push(...DEFAULT_PPT_DIRS);
-                    // removing dups
-                    const uniqueDirs = [...new Set(dirs)];
-                    setPPTDirectories(uniqueDirs);
-                }
-            })
-            .catch((e) => {
-                console.log('Error getting PPTDirectoryPaths ' + e);
-            });
-    };
-
-
     // if loading is true and and files are found, then show loading indicator below the files
     // if loading is false and files are found, then show files without loading indicator
     return (
         <View style={styles.container}>
             {Header}
-            <FileSelectButton
-                allowedTypes={[DocumentPicker.types.ppt, DocumentPicker.types.pptx]}
-                allowMultiSelection={false}
-                onFileSelect={(file) => handleFileSelect(file)}
-            />
 
             <FilesListComponent
                 navigation={navigation}
                 directories={pptDirectories}
-                required_ext={['.ppt', '.pptx']}
+                required_ext={['.pptx']}
                 // listFooterHeight={files.length > 0 ? 70 : 10}
                 // CustomListFooter={<ListFooter loading={loading} files={files} />}
                 onFileClick={(file) => handleFileSelect(file)}
@@ -206,6 +193,23 @@ const Notes = ({ navigation }) => {
                     />
                 )
             }
+
+            <BottomRightStackComponent
+                components={[
+                    <FolderSelectButton
+                        onFolderSelect={(folder) => {
+                            setPPTDirectories(prevDirectories => [...prevDirectories, folder]);
+                        }}
+                        type={'secondary'}
+                    />,
+                    <FileSelectButton
+                        allowedTypes={[DocumentPicker.types.pptx]}
+                        allowMultiSelection={false}
+                        onFileSelect={(file) => handleFileSelect(file)}
+                    />
+                ]}
+            />
+
         </View>
     );
 };
@@ -237,10 +241,10 @@ const NotesOutputComponent = ({ downloadedFile, onPress, onClose }) => {
                                 underlayColor={''}
                                 onPress={onPress}
                             >
-                                <DocumentItem 
-                                    iconSrc={getFileIcon(downloadedFile.name)} 
-                                    title={downloadedFile.name} 
-                                    size={formatSize(downloadedFile.size)} 
+                                <DocumentItem
+                                    iconSrc={getFileIcon(downloadedFile.name)}
+                                    title={downloadedFile.name}
+                                    size={formatSize(downloadedFile.size)}
                                     filePath={downloadedFile.path}
                                 />
                             </TouchableHighlight>
