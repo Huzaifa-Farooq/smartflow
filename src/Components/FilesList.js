@@ -11,7 +11,6 @@ import FileViewer from "react-native-file-viewer";
 import { DocumentItem } from './DocumentItem';
 import { getFileIcon, formatSize, searchFilesArray, loadFiles, sortFilesArray } from '../utils/utils.mjs';
 import { animatedFilesListViewStyle } from '../styles/styles';
-import { error } from 'pdf-lib';
 
 
 const height = Dimensions.get('window').height;
@@ -117,23 +116,19 @@ export default FilesListComponent = ({
     const scrollY = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setInitialLoading(false);
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, []);
-
-
-    useEffect(() => {
         try {
             folderReader();
         } catch (e) {
             console.log('==== Error reading directories ====');
             console.log('Error: ' + e);
-            console.log('===================================');
         }
-    }, [])
+
+        const timer = setTimeout(() => {
+            setInitialLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [directories]);
 
     const folderReader = async () => {
         setLoading(true);
@@ -144,16 +139,31 @@ export default FilesListComponent = ({
             });
         }));
         // removing duplicated items with path key
+        const dupeFilteredResults = results.flat().filter((item, index, self) =>
+            index === self.findIndex((t) => (
+                t.path === item.path
+            ))
+        );
+
+        const filteredResults = [];
+        // If there are files with duplicated names, keep the one that has 'content' in their path
+        dupeFilteredResults.forEach((item) => {
+            if (filteredResults.some((file) => file.name === item.name)) {
+                const index = filteredResults.findIndex((file) => file.name === item.name);
+                if (item.path.includes('content')) {
+                    filteredResults[index] = item;
+                }
+            } else {
+                filteredResults.push(item);
+            }
+        });
+
         setResult(sortFilesArray({
-            // flattening and removing duplicates (if any)
-            files: results.flat().filter((item, index, self) =>
-                index === self.findIndex((t) => (
-                    t.path === item.path
-                ))
-            ),
+            files: filteredResults,
             sortBy: 'date',
             reversed: true
         }));
+        
         setLoading(false);
     };
 
