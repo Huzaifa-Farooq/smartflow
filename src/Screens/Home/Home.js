@@ -16,10 +16,11 @@ import { checkServerConnection, generatePresentation } from '../../api/api.mjs';
 import BackgroundFetch from "react-native-background-fetch";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadFiles } from '../../utils/utils.mjs';
-
-import { Alert } from 'react-native';
-
 import '../../utils/global.js';
+
+
+import { Linking, Alert, Platform } from 'react-native'; // Import Alert from 'react-native'
+import VersionCheck from 'react-native-version-check';
 
 
 const loadAndSavePPTDirectoryPaths = async () => {
@@ -86,6 +87,10 @@ const Home = ({ navigation }) => {
     }
 
     useEffect(() => {
+        checkAppVersion();
+    }, []);
+
+    useEffect(() => {
         AsyncStorage.getItem('@PPTDirectoryPaths')
             .then((value) => {
                 if (value === null) {
@@ -140,7 +145,7 @@ const Home = ({ navigation }) => {
                 //     { text: 'Open Settings', onPress: openSettings },
                 //   ],
                 // );
-              }
+            }
         } catch (err) {
             console.warn(err);
         }
@@ -211,7 +216,7 @@ const Home = ({ navigation }) => {
                         iconBackgroundColor={"#F8BBD0"}
                         onPress={() => handleNavigation("Templates")}
                         topRightIconName={isConnected ? null : 'wifi-off'}
-                        />
+                    />
 
                 </View>
                 <View style={{
@@ -243,5 +248,44 @@ const Home = ({ navigation }) => {
         </View>
     );
 };
+
+
+const checkAppVersion = async () => {
+    try {
+        const latestVersion = Platform.OS === 'ios' ? await fetch(`https://itunes.apple.com/in/lookup?bundleId= put her your bundleId like com.app`)
+            .then(r => r.json())
+            .then((res) => { return res?.results[0]?.version })
+            : await VersionCheck.getLatestVersion({
+                provider: 'playStore',
+                packageName: 'com.smartflow',
+                ignoreErrors: true,
+            });
+
+        console.log('vers', await VersionCheck.getPlayStoreUrl({ packageName: 'com.smartflow' }))
+
+        const currentVersion = VersionCheck.getCurrentVersion();
+
+        if (latestVersion > currentVersion) {
+            const url = await VersionCheck.getStoreUrl({ packageName: 'com.smartflow' });
+            Alert.alert(
+                'Update Required',
+                'A new version of the app is available. Please update to continue using the app.',
+                [
+                    {
+                        text: 'Update Now',
+                        onPress: () => {Linking.openURL(url)},
+                    },
+                ],
+                { cancelable: false }
+            );
+        } else {
+            // App is up-to-date; proceed with the app
+        }
+    } catch (error) {
+        // Handle error while checking app version
+        console.error('Error checking app version:', error);
+    }
+};
+
 
 export default Home;
