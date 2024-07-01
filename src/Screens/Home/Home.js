@@ -251,22 +251,20 @@ const Home = ({ navigation }) => {
 
 
 const checkAppVersion = async () => {
+    const packageName = 'com.smartflow';
     try {
-        const latestVersion = Platform.OS === 'ios' ? await fetch(`https://itunes.apple.com/in/lookup?bundleId= put her your bundleId like com.app`)
-            .then(r => r.json())
-            .then((res) => { return res?.results[0]?.version })
-            : await VersionCheck.getLatestVersion({
+        const latestVersion = await VersionCheck.getLatestVersion({
                 provider: 'playStore',
                 packageName: 'com.smartflow',
                 ignoreErrors: true,
             });
 
-        console.log('vers', await VersionCheck.getPlayStoreUrl({ packageName: 'com.smartflow' }))
+        console.log('Latest version: ', await VersionCheck.getPlayStoreUrl({ packageName: packageName }))
 
         const currentVersion = VersionCheck.getCurrentVersion();
 
         if (latestVersion > currentVersion) {
-            const url = await VersionCheck.getStoreUrl({ packageName: 'com.smartflow' });
+            const url = await VersionCheck.getStoreUrl({ packageName: packageName });
             Alert.alert(
                 'Update Required',
                 'A new version of the app is available. Please update to continue using the app.',
