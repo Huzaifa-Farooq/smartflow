@@ -48,8 +48,10 @@
     "react-native-share": "^10.0.2",
     "react-native-svg": "^15.0.0",
     "react-native-vector-icons": "^10.0.3",
+    "react-native-version-check": "^3.4.7",
     "react-native-video": "^5.2.1",
-    "rn-fetch-blob": "^0.12.0"
+    "rn-fetch-blob": "^0.12.0",
+    "sp-react-native-in-app-updates": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
