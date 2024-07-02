@@ -1,17 +1,60 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, StatusBar, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, ScrollView, TextInput, TouchableOpacity, Modal } from 'react-native';
 import CustomHeader from '../../Components/CustomHeader';
 import Banner from '../../Components/BannersAd/Banner';
+import { useState } from 'react';
+import AnimatedIcon from '../../Components/AnimatedIcon';
+
+import { submitFeedback } from '../../api/api.mjs';
 
 
 // create a component
 const FeedBack = ({ navigation }) => {
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [feedback, setFeedback] = useState('');
+
+    const maxLength = 300;
+    const minLength = 20;
+
+    const isWithinLimit = feedback.length >= minLength && feedback.length <= maxLength;
+
+    const onPress = () => {
+        if (!isWithinLimit) {
+            return;
+        }
+        setFeedback('');
+        submitFeedback({
+            text: feedback,
+            successCallback: () => {
+                console.log('Feedback submitted successfully');
+                setSuccessModalVisible(true);
+            },
+            errorCallback: (errorMessage) => {
+                console.log('Error while submitting feedback: ', errorMessage);
+                setSuccessModalVisible(true);
+            }
+        });
+    }
 
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#deb018" barStyle="dark-content" />
             <CustomHeader title="FeedBack" icon={"keyboard-backspace"} onPress={() => navigation.goBack()} />
+
+            {
+                successModalVisible && (
+                    <SuccessModal
+                        text={'Feedback submitted successfully'}
+                        iconName={'success'}
+                        iconProps={{
+                            onAnimationFinish: () => { setSuccessModalVisible(false) },
+                            speed: 1.3
+                        }}
+                    />
+                )
+            }
+
             <ScrollView>
                 <View style={styles.main_cont}>
                     <View style={styles.cont}>
@@ -24,13 +67,24 @@ const FeedBack = ({ navigation }) => {
                             <View style={styles.col_2}>
                                 <TextInput
                                     placeholder='Describe What do you like most...'
-                                    style={styles.TextInput}
                                     placeholderTextColor='#777777'
+                                    multiline={true}
+                                    onChangeText={(text) => { setFeedback(text) }}
+                                    style={styles.TextInput}
+                                    value={feedback}
                                 />
-
+                                <View style={{ marginTop: 5, marginLeft: 8 }} >
+                                    <Text style={{ 
+                                        color: (isWithinLimit || feedback.length === 0) ? '#777777' : 'red' 
+                                        }}>
+                                        {feedback.length} / {maxLength} characters - ({minLength} minimum)
+                                    </Text>
+                                </View>
                             </View>
                             <View style={styles.col_3}>
-                                <TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={onPress}
+                                >
                                     <View style={styles.btn_adj}>
                                         <Text style={styles.btn_text}>
                                             Submit
@@ -38,7 +92,8 @@ const FeedBack = ({ navigation }) => {
                                     </View>
                                 </TouchableOpacity>
                             </View>
-
+                            <View style={styles.charLimitLabel}>
+                            </View>
                         </View>
                     </View>
 
@@ -48,6 +103,72 @@ const FeedBack = ({ navigation }) => {
         </View>
     );
 };
+
+const SuccessModal = ({
+    text,
+    iconName,
+    iconProps
+}) => {
+    return (
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={true}
+            onRequestClose={() => { }}
+        >
+            <View style={modalStyles.centeredView}>
+                <View style={modalStyles.modalView}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <AnimatedIcon
+                            name={iconName}
+                            style={{ width: 100, height: 100 }}
+                            loop={false}
+                            props={iconProps}
+                        />
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                fontWeight: 'bold',
+                                color: 'black',
+                                padding: 10
+                            }}
+                            numberOfLines={2}
+                            ellipsizeMode='tail'
+                        >
+                            {text}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+}
+
+
+const modalStyles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalView: {
+        backgroundColor: "white",
+        height: 200,
+        width: 200,
+        borderRadius: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        borderBlockColor: 'black',
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+});
+
 
 // define your styles
 const styles = StyleSheet.create({

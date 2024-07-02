@@ -255,11 +255,11 @@ const checkAppVersion = async () => {
     try {
         const latestVersion = await VersionCheck.getLatestVersion({
                 provider: 'playStore',
-                packageName: 'com.smartflow',
+                packageName: packageName,
                 ignoreErrors: true,
             });
 
-        console.log('Latest version: ', await VersionCheck.getPlayStoreUrl({ packageName: packageName }))
+        console.log('Latest version  ', latestVersion)
 
         const currentVersion = VersionCheck.getCurrentVersion();
 
@@ -271,7 +271,7 @@ const checkAppVersion = async () => {
                 [
                     {
                         text: 'Update Now',
-                        onPress: () => {Linking.openURL(url)},
+                        onPress: () => { Linking.openURL(url) },
                     },
                 ],
                 { cancelable: false }

@@ -17,7 +17,7 @@ const pathMap = {
 };
 
 
-const AnimatedIcon = ({ name, style, loop=true }) => {
+const AnimatedIcon = ({ name, style, loop=true, props }) => {
     if (name == 'download' || name == 'fileDownload'){
         style = {
             ...style,
@@ -33,6 +33,8 @@ const AnimatedIcon = ({ name, style, loop=true }) => {
             style={{
                 ...style
             }}
+            {...props}
+
         >
             </LottieView>
     );

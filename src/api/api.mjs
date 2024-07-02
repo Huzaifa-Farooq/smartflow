@@ -7,7 +7,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 
 
 axios.defaults.baseURL = 'http://3.108.117.20';
-// axios.defaults.baseURL = 'http://192.168.10.3:8001';
+// axios.defaults.baseURL = 'http://192.168.10.9:8001';
 
 
 export const generateAssignment = ({ title, mode, successCallback, errorCallback }) => {
@@ -168,6 +168,22 @@ export const getTemplates = ({ successCallback, errorCallback }) => {
     });
   }
 
+
+  export const submitFeedback = ({ text, successCallback, errorCallback }) => {
+    console.log(text)
+    axios.post('submit_feedback', {
+      "feedback": text
+    })
+    .then((response) => {
+      successCallback(response.data);
+    })
+    .catch((error) => {
+      console.log('====================================');
+      console.log('error while submitting feedback: ' + error);
+      console.log('====================================');
+      errorCallback(error.message);
+    });
+  }
 
 export const checkServerConnection = (onResponse) => {
   console.log('====================================');
