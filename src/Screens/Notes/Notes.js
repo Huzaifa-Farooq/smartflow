@@ -23,7 +23,7 @@ import '../../utils/global.js';
 import { loadFoldersToScan } from '../../utils/utils.mjs';
 import { BottomRightStackComponent } from '../../Components/FileSelectButton';
 
-import { transferFile } from 'react-native-saf-x';
+import { copyFile as scopedCopyFile } from 'react-native-saf-x';
 
 const DEFAULT_PPT_DIRS = [
     global.APP_DIRECTORY,
@@ -60,8 +60,15 @@ const Notes = ({ navigation }) => {
             try{
                 const r = await RNFS.copyFile(uri, fileCopyUri);
                 console.log('copy response: ' , r);
-            } catch (e){
-                console.log('Error copying file using RNFS ', e);
+            } catch (rnfsErr){
+                try {
+                    const r = await scopedCopyFile(uri, fileCopyUri, { replaceIfDestinationExists: true });
+                    console.log('copy response: ' , r);
+                } catch (scopedErr) {
+                    console.error('Error copying file using RNFS ', rnfsErr);
+                    console.error('Error copying file using SAF ', scopedErr);
+                    return;
+                }
             }
             path = fileCopyUri;
         }
