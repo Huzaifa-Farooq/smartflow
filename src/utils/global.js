@@ -12,12 +12,12 @@ if (Platform.constants['Release'] >= 12) {
     global.IS_ANDOID_VERSION_13 = false;
 }
 
-PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
-.then((response) => {
-    if (response) {
-        global.APP_DIRECTORY = RNFS.ExternalStorageDirectoryPath + '/SmartFlow';
-    }
-})
+// PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+// .then((response) => {
+//     if (response) {
+//         global.APP_DIRECTORY = RNFS.ExternalStorageDirectoryPath + '/SmartFlow';
+//     }
+// })
 
 global.ASSIGNMENT_FOLDER = global.APP_DIRECTORY + '/Assignments';
 global.NOTES_DIRECTORY_PATH = global.APP_DIRECTORY + '/Notes';
