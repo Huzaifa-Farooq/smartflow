@@ -117,7 +117,6 @@ export const loadFiles = async ({
                 };
             });
         }
-        console.log('Reading directory: ' + directoryPath)
 
     } catch (e) {
         console.log('============== Error reading directory ======================');
@@ -140,7 +139,6 @@ export const loadFiles = async ({
             }
             else {
                 visitedDirectories.push(file.path);
-                console.log('Reading directory: ' + file.path);
                 const subFiles = await loadFiles({ directoryPath: file.path, required_ext, directoriesToSkip, visitedDirectories });
                 requiredFiles.push(...subFiles);
             }
