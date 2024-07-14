@@ -122,7 +122,7 @@ const Home = ({ navigation }) => {
                 PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                 {
                     title: 'Storage Permission',
-                    message: 'Apps need to access storage ',
+                    message: 'Apps need to access storage (optional).',
                     buttonNeutral: 'Ask Me Later',
                     buttonNegative: 'Cancel',
                     buttonPositive: 'OK',
