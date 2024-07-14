@@ -101,9 +101,9 @@ const Notes = ({ navigation }) => {
                 console.error(JSON.stringify(error));
                 // printing error message to user
                 if (error.includes('uploading file')) {
-                    setError('Error uploading file');
+                    setError('Error uploading file.');
                 } else {
-                    setError('Error while generating notes');
+                    setError('Error while generating notes. Make sure file format is pptx.');
                 }
 
                 setDisplayModal(false);
