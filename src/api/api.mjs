@@ -7,7 +7,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 
 
 axios.defaults.baseURL = 'http://3.108.117.20';
-// axios.defaults.baseURL = 'http://192.168.10.9:8001';
+// axios.defaults.baseURL = 'http://192.168.43.92:8001';
 
 
 export const generateAssignment = ({ title, mode, successCallback, errorCallback }) => {
