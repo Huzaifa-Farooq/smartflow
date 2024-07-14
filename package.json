@@ -1,6 +1,6 @@
 {
   "name": "Smartflow",
-  "version": "0.0.3",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -33,7 +33,6 @@
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.15.0",
     "react-native-google-mobile-ads": "^12.10.0",
-    "react-native-image-filter-kit": "^0.8.0",
     "react-native-image-picker": "^7.1.0",
     "react-native-pdf": "^6.7.4",
     "react-native-permissions": "^4.0.4",
