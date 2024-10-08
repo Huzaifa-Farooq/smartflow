@@ -6,75 +6,34 @@ import RNFS from 'react-native-fs';
 
 import CustomHeader from '../../Components/CustomHeader';
 import HomeCard from '../../Components/HomeCard';
-import HomeCardTwo from '../../Components/HomeCardTwo';
 import Banner from '../../Components/BannersAd/Banner';
 import SplashScreen from '../SplashScreen/SplashScreen';
 
 import ErrorDialog from '../../Components/ErrorDialog';
 import { checkServerConnection, generatePresentation } from '../../api/api.mjs';
 
-import BackgroundFetch from "react-native-background-fetch";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadFiles } from '../../utils/utils.mjs';
 import '../../utils/global.js';
 
-
-import { Linking, Alert, Platform } from 'react-native'; // Import Alert from 'react-native'
+import { Linking, Alert } from 'react-native'; // Import Alert from 'react-native'
 import VersionCheck from 'react-native-version-check';
 
-
-const loadAndSavePPTDirectoryPaths = async () => {
-    const files = await loadFiles({
-        directoryPath: RNFS.ExternalStorageDirectoryPath,
-        required_ext: ['.ppt', '.pptx'],
-    });
-    const directoryPaths = files.map(file => file.path.split('/').slice(0, -1).join('/'));
-    const defaultDirectories = [
-        RNFS.DownloadDirectoryPath + '/SmartFlow',
-        RNFS.DocumentDirectoryPath,
-        '/storage/emulated/0/WhatsApp/',
-        '/Internal storage/Android/media/com.whatsapp/WhatsApp/',
-        '/Internal storage/Android/media/com.whatsapp'
-    ];
-    directoryPaths.push(...defaultDirectories);
-    // removing duplicates from directoryPaths
-    const uniqueDirectoryPaths = [...new Set(directoryPaths)];
-
-    try {
-        // removing PPTDirectoryPaths
-        await AsyncStorage.removeItem('@PPTDirectoryPaths');
-        // adding directories to PPTDirectoryPaths
-        await AsyncStorage.setItem('@PPTDirectoryPaths', JSON.stringify(uniqueDirectoryPaths));
-    } catch (e) {
-        console.log('Error saving PPTDirectoryPaths ' + e);
-    }
-}
+import OpenCV from '../../../modules/opencv/OpenCV';
 
 
-let BackgroundFilesFetchTask = async (event) => {
-    await loadAndSavePPTDirectoryPaths();
-    BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
-}
-
-// Configuration
-BackgroundFetch.configure(
-    {
-        minimumFetchInterval: 24 * 60,
-        stopOnTerminate: false,
-        enableHeadless: true,
-        requiresBatteryNotLow: true,
-        requiresCharging: false,
-        requiresStorageNotLow: false,
-        requiresNetworkConnectivity: false,
-    },
-    onTimeout = () => {
-        console.log('BackgroundFetch timeout');
-    },
-    BackgroundFilesFetchTask
-);
-
-// Start the background fetch
-BackgroundFetch.start();
+RNFS.readDir(RNFS.DownloadDirectoryPath).then((result) => {
+    result.forEach((file) => {
+        if (file.isFile() && file.name.endsWith('.jpg')) {
+            console.log(file.name);
+            RNFS.readFile(file.path, 'base64').then((res) => {
+                OpenCV.checkForBlurryImage(res, (r) => { console.log(r) }, (r) => { console.log(r) });
+            });
+        }
+    })
+}).catch((err) => {
+    console.log(err)
+})
 
 
 const Home = ({ navigation }) => {
@@ -91,28 +50,14 @@ const Home = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-        AsyncStorage.getItem('@PPTDirectoryPaths')
-            .then((value) => {
-                if (value === null) {
-                    // trigger BackgroundFilesFetchTask
-                    BackgroundFilesFetchTask();
-                } else {
-                    console.log('PPTDirectoryPaths already exists. \n' + value);
-                }
-            })
-            .catch((e) => {
-                console.log('Error getting PDFDirectoryPaths ' + e);
-            });
-
         checkServerConnection((val) => { setIsConnected(val) })
 
         setTimeout(() => {
             setShowSplash(false);
+            setTimeout(() => {
+                requestPermission();
+            }, 500);
         }, 2500);
-
-        setTimeout(() => {
-            requestPermission();
-        }, 500);
     }, []);
 
     const requestPermission = async () => {
@@ -137,14 +82,6 @@ const Home = ({ navigation }) => {
                 console.log('Storage Permission Denied.');
             } else if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
                 console.log('Storage Permission Denied with Never Ask Again.');
-                // Alert.alert(
-                //   'Storage Permission Required',
-                //   'App needs access to your storage to read files. Please go to app settings and grant permission.',
-                //   [
-                //     { text: 'Cancel', style: 'cancel' },
-                //     { text: 'Open Settings', onPress: openSettings },
-                //   ],
-                // );
             }
         } catch (err) {
             console.warn(err);

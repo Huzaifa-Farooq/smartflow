@@ -8,13 +8,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
-
 import java.util.List;
-import java.util.Arrays;
-
-import com.reactlibrary.RNOpenCvLibraryPackage;
-import org.opencv.android.OpenCVLoader;
-
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -29,7 +23,6 @@ public class MainApplication extends Application implements ReactApplication {
         protected List<ReactPackage> getPackages() {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
-          packages.add(new RNOpenCvLibraryPackage());
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           return packages;
@@ -65,8 +58,5 @@ public class MainApplication extends Application implements ReactApplication {
       DefaultNewArchitectureEntryPoint.load();
     }
     ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-    if (!OpenCVLoader.initDebug()) {
-          System.out.println("OpenCv! Error while init");
-      }
   }
 }

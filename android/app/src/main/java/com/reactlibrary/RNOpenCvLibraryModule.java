@@ -10,6 +10,10 @@ import android.graphics.BitmapFactory;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.*;
+
+import java.io.*;
+
 
 import org.opencv.android.Utils;
 import org.opencv.imgproc.Imgproc;
@@ -39,7 +43,6 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
 
       byte[] decodedString = Base64.decode(imageAsBase64, Base64.DEFAULT);
       Bitmap image = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
 
 //      Bitmap image = decodeSampledBitmapFromFile(imageurl, 2000, 2000);
       int l = CvType.CV_8UC1; //8-bit grey scale image
@@ -80,12 +83,58 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
     }
   }
 
+
+  // private static Bitmap getResizedBitmapCV(Bitmap inputBitmap, int newWidth, int newHeight) {
+  //   // Convert the input Bitmap to a Mat
+  //   Mat inputMat = new Mat();
+  //   Utils.bitmapToMat(inputBitmap, inputMat);
+  //   // Create a new Mat for the resized image
+  //   Mat resizedMat = new Mat();
+  //   Imgproc.resize(inputMat, resizedMat, new Size(newWidth, newHeight));
+  //   // Convert the resized Mat back to a Bitmap
+  //   Bitmap resizedBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+  //   Utils.matToBitmap(resizedMat, resizedBitmap);
+  //   inputMat.release();
+  //   resizedMat.release();
+  //   return resizedBitmap;
+  // }
+
+  @ReactMethod
+  public void applyFilter(String imageAsBase64, String filterName, Callback errorCallback, Callback successCallback) {
+    try {
+      successCallback.invoke("Applying filter " + filterName);
+    }
+    catch (Exception e) {
+      errorCallback.invoke(e.getMessage());
+    }
+  }
+
   @ReactMethod
   public void toGrayscale(String imageAsBase64, Callback errorCallback, Callback successCallback) {
     try {
-      Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY)
-      // to return your processed image back to js use the following line
-      successCallback.invoke("Response from java");
+      // convert image to grayscale and return as base64
+      BitmapFactory.Options options = new BitmapFactory.Options();
+      options.inDither = true;
+      options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+      byte[] decodedString = Base64.decode(imageAsBase64, Base64.DEFAULT);
+      Bitmap image = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+      Mat matImage = new Mat();
+      Utils.bitmapToMat(image, matImage);
+      Mat matImageGrey = new Mat();
+      Imgproc.cvtColor(matImage, matImageGrey, Imgproc.COLOR_BGR2GRAY);
+      // Convert Mat back to Bitmap
+      Bitmap resultBitmap = Bitmap.createBitmap(matImageGrey.cols(), matImageGrey.rows(), Bitmap.Config.ARGB_8888);
+      Utils.matToBitmap(matImageGrey, resultBitmap);
+
+      // Convert Bitmap to base64
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+      byte[] byteArray = byteArrayOutputStream.toByteArray();
+      String resultBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+      successCallback.invoke(resultBase64);
     }
     catch (Exception e) {
       errorCallback.invoke(e.getMessage());
